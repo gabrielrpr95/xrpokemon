@@ -437,49 +437,49 @@
 
             <!-- Additional 150 NFT frames (hidden by default) -->
             <script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    const nftGrid = document.getElementById('nft-grid');
-                    const pokemonRarities = {
-    comum: [
-        'Abra', 'Arbok', 'Arcanine', 'Bellsprout', 'Cubone',
-        'Diglett', 'Dodrio', 'Doduo', 'Dugtrio', 'Ekans',
-        'Electrode', 'Exeggcute', 'Exeggutor', 'Fearow', 'Farfetch\'d',
-        'Geodude', 'Gloom', 'Golbat', 'Golduck', 'Golem',
-        'Graveler', 'Grimer', 'Growlithe', 'Haunter', 'Hitmonchan',
-        'Hitmonlee', 'Horsea', 'Kadabra', 'Kingler', 'Koffing',
-        'Krabby', 'Machamp', 'Machoke', 'Machop', 'Magnemite',
-        'Magneton', 'Mankey', 'Marowak', 'Meowth', 'Metapod',
-        'Muk', 'Nidoran', 'Nidoran_m', 'Nidorina', 'Nidorino',
-        'Oddish', 'Onix', 'Paras', 'Parasect', 'Persian',
-        'Pidgeot', 'Pidgeotto', 'Pidgey', 'Pikachu', 'Poliwag',
-        'Poliwhirl', 'Poliwrath', 'Ponyta', 'Primeape', 'Psyduck',
-        'Raichu', 'Rapidash', 'Raticate', 'Rattata', 'Rhydon',
-        'Rhyhorn', 'Sandshrew', 'Sandslash', 'Seadra', 'Seaking',
-        'Seel', 'Shellder', 'Slowbro', 'Slowpoke', 'Spearow',
-        'Starmie', 'Staryu', 'Tangela', 'Tentacool', 'Tentacruel',
-        'Venomoth', 'Venonat', 'Vileplume', 'Voltorb', 'Weedle',
-        'Weepinbell', 'Zubat'
-    ],
-    raro: [
-        'Alakazam', 'Beedrill', 'Blastoise', 'Butterfree', 'Chansey',
-        'Charizard', 'Charmander', 'Charmeleon', 'Clefable', 'Clefairy',
-        'Cloyster', 'Dewgong', 'Ditto', 'Dragonair',
-        'Drowzee', 'Eevee', 'Electabuzz', 'Gastly',
-        'Gengar', 'Goldeen', 'Gyarados', 'Hypno', 'Jigglypuff',
-        , 'Jynx', 'Kakuna', 'Kangaskhan', 'Lapras',
-        'Lickitung', 'Magikarp', 'Magmar', 'Mr. Mime', 'Nidoqueen',
-        'Nidoking', 'Ninetales', 'Pinsir', 'Porygon',
-        'Snorlax', 'Tauros', 'Vulpix', 'Wartortle',
-        'Weezing', 'Wigglytuff', 'Victreebel'
-    ],
-    lendario: [
-        'Aerodactyl', 'Dragonite', 'Kabuto', 'Kabutops', 'Omanyte', 'Dratini'
-        'Omastar', 'Porygon', 'Snorlax', 'Vaporeon', 'Jolteon', 'Flareon'
-    ],
-    mitico: [
-        'Articuno', 'Moltres', 'Zapdos', 'Mew', 'Mewtwo'
-    ]
-};
+    document.addEventListener('DOMContentLoaded', function() {
+        const nftGrid = document.getElementById('nft-grid');
+        const pokemonRarities = {
+            comum: [
+                'Abra', 'Arbok', 'Arcanine', 'Bellsprout', 'Cubone',
+                'Diglett', 'Dodrio', 'Doduo', 'Dugtrio', 'Ekans',
+                'Electrode', 'Exeggcute', 'Exeggutor', 'Fearow', 'Farfetch\'d',
+                'Geodude', 'Gloom', 'Golbat', 'Golduck', 'Golem',
+                'Graveler', 'Grimer', 'Growlithe', 'Haunter', 'Hitmonchan',
+                'Hitmonlee', 'Horsea', 'Kadabra', 'Kingler', 'Koffing',
+                'Krabby', 'Machamp', 'Machoke', 'Machop', 'Magnemite',
+                'Magneton', 'Mankey', 'Marowak', 'Meowth', 'Metapod',
+                'Muk', 'Nidoran', 'Nidoran_m', 'Nidorina', 'Nidorino',
+                'Oddish', 'Onix', 'Paras', 'Parasect', 'Persian',
+                'Pidgeot', 'Pidgeotto', 'Pidgey', 'Pikachu', 'Poliwag',
+                'Poliwhirl', 'Poliwrath', 'Ponyta', 'Primeape', 'Psyduck',
+                'Raichu', 'Rapidash', 'Raticate', 'Rattata', 'Rhydon',
+                'Rhyhorn', 'Sandshrew', 'Sandslash', 'Seadra', 'Seaking',
+                'Seel', 'Shellder', 'Slowbro', 'Slowpoke', 'Spearow',
+                'Starmie', 'Staryu', 'Tangela', 'Tentacool', 'Tentacruel',
+                'Venomoth', 'Venonat', 'Vileplume', 'Voltorb', 'Weedle',
+                'Weepinbell', 'Zubat'
+            ],
+            raro: [
+                'Alakazam', 'Beedrill', 'Blastoise', 'Butterfree', 'Chansey',
+                'Charizard', 'Charmander', 'Charmeleon', 'Clefable', 'Clefairy',
+                'Cloyster', 'Dewgong', 'Ditto', 'Dragonair',
+                'Drowzee', 'Eevee', 'Electabuzz', 'Gastly',
+                'Gengar', 'Goldeen', 'Gyarados', 'Hypno', 'Jigglypuff',
+                'Jynx', 'Kakuna', 'Kangaskhan', 'Lapras',
+                'Lickitung', 'Magikarp', 'Magmar', 'Mr. Mime', 'Nidoqueen',
+                'Nidoking', 'Ninetales', 'Pinsir', 'Porygon',
+                'Snorlax', 'Tauros', 'Vulpix', 'Wartortle',
+                'Weezing', 'Wigglytuff', 'Victreebel'
+            ],
+            lendario: [
+                'Aerodactyl', 'Dragonite', 'Kabuto', 'Kabutops', 'Omanyte', 'Dratini',
+                'Omastar', 'Porygon', 'Snorlax', 'Vaporeon', 'Jolteon', 'Flareon'
+            ],
+            mitico: [
+                'Articuno', 'Moltres', 'Zapdos', 'Mew', 'Mewtwo'
+            ]
+        };
 
         // Função para renderizar os Pokémon com base na raridade
         function renderPokemon(rarity) {
