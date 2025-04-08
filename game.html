@@ -350,38 +350,30 @@
       // Função para conectar a carteira XUMM
 async function connectXummWallet() {
   try {
-    // Limpar qualquer token antigo que possa estar causando problemas
-    localStorage.removeItem('xummUserToken');
-    localStorage.removeItem('xummWalletAddress');
-    
     // Desabilitar o botão enquanto processamos
     connectWalletBtn.classList.add('disabled');
     connectWalletBtn.textContent = "Conectando...";
     
-    // Criar um objeto de payload XUMM SDK
-    const xumm = new Xumm('46c2e7c6-c005-4a6d-bef7-e0b6090bc9bd');
-    
     console.log("Iniciando solicitação de autorização XUMM...");
     
-    // Criar uma solicitação de sign-in com configurações simplificadas
-    const request = await xumm.authorize();
+    // Criar uma nova instância do XUMM SDK com configuração mais simples
+    const xumm = new Xumm('46c2e7c6-c005-4a6d-bef7-e0b6090bc9bd');
     
-    // Extrair apenas os campos necessários para evitar estrutura circular
-    const safeRequest = {
-      success: request.success,
-      token: request.token,
-      me: request.me ? {
-        account: request.me.account
-      } : null,
-      error: request.error,
-      message: request.message
-    };
+    // Configurar a autorização com opções específicas
+    const request = await xumm.authorize({
+      redirectUrl: window.location.origin + window.location.pathname,
+      returnErrors: true
+    });
     
-    console.log("Resposta da solicitação (segura):", safeRequest);
+    // Log simplificado para evitar estrutura circular
+    console.log("Resposta da solicitação (segura):", {
+      success: request?.success,
+      hasToken: !!request?.token,
+      hasAccount: !!request?.me?.account
+    });
     
-    if (request && request.success) {
-      console.log("Carteira conectada com sucesso!");
-      
+    // Verificar se a solicitação foi bem-sucedida
+    if (request && request.success === true && request.me && request.me.account) {
       // Obter o endereço da carteira e o token
       userToken = request.token;
       userAddress = request.me.account;
@@ -393,15 +385,23 @@ async function connectXummWallet() {
       // Atualizar a interface do usuário
       connectWalletBtn.textContent = "Carteira Conectada";
       alert("Carteira conectada! Endereço: " + userAddress);
+      
+      return true;
     } else {
-      // Exibir mensagem simplificada para evitar problemas de serialização
-      console.error("Falha na conexão");
-      alert("Conexão cancelada ou falhou. Por favor, tente novamente.");
+      console.error("Falha na conexão:", {
+        success: request?.success,
+        error: request?.error
+      });
+      
+      // Mensagem simplificada de erro
+      alert("Não foi possível completar a conexão com a carteira. Por favor, tente novamente.");
+      
+      return false;
     }
   } catch (error) {
-    // Tratar o erro sem tentar converter objetos complexos
     console.error("Erro ao conectar carteira:", error.message);
-    alert("Erro ao conectar carteira: " + error.message);
+    alert("Erro ao conectar carteira. Por favor, verifique o console para mais detalhes.");
+    return false;
   } finally {
     connectWalletBtn.classList.remove('disabled');
     connectWalletBtn.textContent = "Connect Wallet";
