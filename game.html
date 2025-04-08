@@ -6,8 +6,8 @@
   <title>XRPokémon - Lobby & Batalha</title>
   <!-- Importa a fonte "Press Start 2P" -->
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-  <!-- Importa o XUMM SDK -->
-<script src="https://unpkg.com/xumm-sdk@3.0.0/dist/xumm-sdk.min.js"></script>
+  <!-- Importa o XUMM SDK Corrigido -->
+  <script src="https://xumm.app/assets/cdn/xumm.min.js"></script>
   <style>
     :root {
       --pokemon-red: #ee1515;
@@ -330,28 +330,96 @@
   <!-- Nosso código JavaScript – colocado no final para garantir que tudo já foi carregado -->
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      // Inicializa o XUMM SDK com sua API Key e Secret
-      const xumm = new XummSdk("46c2e7c6-c005-4a6d-bef7-e0b6090bc9bd", "2d1e7336-5bc5-4035-8512-dc0f6799a7c4");
+      // Variáveis para armazenar informações da carteira conectada
+      let userToken = null;
+      let userAddress = null;
       
-      // Evento para conectar a carteira
-      document.getElementById("connect-wallet").addEventListener("click", async (e) => {
-        e.preventDefault();
+      // Botão de conexão da carteira
+      const connectWalletBtn = document.getElementById("connect-wallet");
+      
+      // Verifica se já existe uma conexão salva no localStorage
+      function checkExistingConnection() {
+        const savedToken = localStorage.getItem('xummUserToken');
+        const savedAddress = localStorage.getItem('xummWalletAddress');
+        
+        if (savedToken && savedAddress) {
+          userToken = savedToken;
+          userAddress = savedAddress;
+          connectWalletBtn.textContent = "Carteira Conectada";
+          console.log("Carteira já conectada: " + savedAddress);
+          return true;
+        }
+        return false;
+      }
+      
+      // Inicializa a verificação de conexão existente
+      checkExistingConnection();
+      
+      // Função para conectar a carteira XUMM
+      async function connectXummWallet() {
         try {
-          const payload = await xumm.payload.create({
-            txjson: { TransactionType: "SignIn" }
-          });
-          console.log("Payload criado:", payload);
-          window.open(payload.next.always, "_blank");
-          const result = await payload.resolved;
-          if (result.signed) {
-            alert("Carteira conectada! Endereço: " + result.account);
-            // Lógica para carregar os NFTs do usuário deve ser implementada aqui.
+          // Desabilitar o botão enquanto processamos
+          connectWalletBtn.classList.add('disabled');
+          connectWalletBtn.textContent = "Conectando...";
+          
+          // Criar um objeto de payload XUMM SDK
+          const xumm = new Xumm('46c2e7c6-c005-4a6d-bef7-e0b6090bc9bd');
+          
+          // Criar uma solicitação de sign-in
+          const request = await xumm.authorize();
+          
+          // Quando a solicitação for resolvida
+          if (request.success) {
+            console.log("Carteira conectada com sucesso!");
+            
+            // Obter o endereço da carteira e o token
+            userToken = request.token;
+            userAddress = request.me.account;
+            
+            // Armazenar informações da carteira
+            localStorage.setItem('xummUserToken', userToken);
+            localStorage.setItem('xummWalletAddress', userAddress);
+            
+            // Atualizar a interface do usuário
+            connectWalletBtn.textContent = "Carteira Conectada";
+            alert("Carteira conectada! Endereço: " + userAddress);
+            
+            // Aqui você poderia chamar uma função para carregar os NFTs do usuário
+            // loadUserNFTs(userAddress);
           } else {
+            console.log("Conexão cancelada ou falhou");
+            connectWalletBtn.textContent = "Connect Wallet";
             alert("Conexão cancelada.");
           }
         } catch (error) {
           console.error("Erro ao conectar carteira:", error);
-          alert("Erro ao conectar carteira.");
+          connectWalletBtn.textContent = "Connect Wallet";
+          alert("Erro ao conectar carteira: " + error.message);
+        } finally {
+          connectWalletBtn.classList.remove('disabled');
+        }
+      }
+      
+      // Função para desconectar a carteira
+      function disconnectWallet() {
+        userToken = null;
+        userAddress = null;
+        localStorage.removeItem('xummUserToken');
+        localStorage.removeItem('xummWalletAddress');
+        connectWalletBtn.textContent = "Connect Wallet";
+        alert("Carteira desconectada!");
+      }
+      
+      // Evento para conectar/desconectar a carteira
+      connectWalletBtn.addEventListener("click", async (e) => {
+        e.preventDefault();
+        
+        if (userToken && userAddress) {
+          // Se já estiver conectado, desconecta
+          disconnectWallet();
+        } else {
+          // Se não estiver conectado, conecta
+          await connectXummWallet();
         }
       });
       
