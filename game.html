@@ -6,8 +6,8 @@
   <title>XRPokémon - Lobby</title>
   <!-- Importa a fonte "Press Start 2P" -->
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-  <!-- Importa o XUMM SDK Corrigido -->
-  <script src="https://xumm.app/assets/cdn/xumm.min.js"></script>
+  <!-- Importa o XUMM SDK CORRETO -->
+  <script src="https://xumm.app/assets/cdn/xumm-sdk.min.js"></script>
   <style>
     :root {
       --pokemon-red: #ee1515;
@@ -26,7 +26,7 @@
       position: relative;
       min-height: 100vh;
     }
-    /* Verifique se o arquivo 'background.png' está na pasta "assets" (atenção à capitalização) */
+    /* Verifique se 'assets/background.png' está no caminho correto e com a capitalização correta */
     body::before {
       content: "";
       position: absolute;
@@ -71,14 +71,12 @@
       border: 8px double var(--pokemon-red);
       border-image: linear-gradient(135deg, var(--pokemon-red) 0%, var(--pokemon-yellow) 40%, var(--pokemon-blue) 100%) 1;
     }
-    
     h1 {
       font-size: 2.5rem;
       margin-bottom: 20px;
       color: var(--pokemon-red);
       text-shadow: 3px 3px 0 var(--pokemon-blue);
     }
-    
     p { font-size: 1rem; margin-bottom: 20px; color: #333; }
     
     /* Seção Lobby */
@@ -188,7 +186,7 @@
       align-self: center;
     }
     
-    /* Caixas colapsáveis (para Regras e Leaderboard) */
+    /* Caixas colapsáveis (Regras e Leaderboard) */
     .collapsible {
       margin-top: 30px;
       background: rgba(255,255,255,0.8);
@@ -240,7 +238,7 @@
   
   <!-- Seção Lobby (inicialmente visível) -->
   <div id="lobby" class="container section">
-    <h1>XRPokemon - Battle Arena (BETA)</h1>
+    <h1>XRPokemon - Battle Arena</h1>
     <p>Open your room to wait for another XRPokemon Trainer.<br>
        The fixed cost to open or join the room is <strong>1.0 XRP</strong>.
     </p>
@@ -328,17 +326,17 @@
     </div>
   </div>
   
-  <!-- Código JavaScript -->
+  <!-- Nosso código JavaScript -->
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      // Variáveis para armazenar informações da carteira conectada
+      // Variáveis para armazenar as informações da carteira conectada
       let userToken = null;
       let userAddress = null;
       
-      // Botão de conexão da carteira
+      // Botão para conectar a carteira
       const connectWalletBtn = document.getElementById("connect-wallet");
       
-      // Verifica se já existe conexão salva no localStorage
+      // Função para verificar conexão armazenada
       function checkExistingConnection() {
         const savedToken = localStorage.getItem('xummUserToken');
         const savedAddress = localStorage.getItem('xummWalletAddress');
@@ -360,12 +358,12 @@
           connectWalletBtn.textContent = "Conectando...";
           console.log("Iniciando solicitação de autorização XUMM...");
           
-          // Cria uma nova instância do XUMM SDK (use API Key e API Secret se necessário)
+          // Cria uma nova instância do XUMM SDK com API Key e Secret
           const xumm = new XummSdk("46c2e7c6-c005-4a6d-bef7-e0b6090bc9bd", "2d1e7336-5bc5-4035-8512-dc0f6799a7c4");
           
-          // Solicita autorização com um redirectUrl configurado (pode ser a própria página)
+          // Solicita autorização com um redirectUrl configurado (usa a URL atual)
           const auth = await xumm.authorize({
-            redirectUrl: window.location.href,
+            redirectUrl: window.location.origin + window.location.pathname,
             returnErrors: true
           });
           
@@ -401,7 +399,7 @@
       connectWalletBtn.addEventListener("click", async (e) => {
         e.preventDefault();
         if (userToken && userAddress) {
-          // Se já conectado, desconecta
+          // Desconectar
           userToken = null;
           userAddress = null;
           localStorage.removeItem('xummUserToken');
@@ -495,7 +493,7 @@
         });
       });
       
-      // Alterna da seção Lobby para a seção Game
+      // Alterna da seção Lobby para a seção Game (para abrir a sala)
       document.getElementById("create-room").addEventListener("click", function(e) {
         e.preventDefault();
         const roomCost = 1.0; // Custo fixo de 1.0 XRP
@@ -504,7 +502,7 @@
         document.getElementById("game").style.display = "block";
       });
       
-      // Lógica para os botões "Join" nas lobbies disponíveis (simulação)
+      // Lógica para os botões "Join" nos lobbies disponíveis (simulação)
       document.querySelectorAll('.lobby-entry .join-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
           e.preventDefault();
