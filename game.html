@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>XRPokémon - Lobby & Batalha</title>
-  <!-- Importa a fonte "Press Start 2P" -->
+  <!-- Importa a fonte "Press Start 2P" para manter a identidade visual Pokémon -->
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   <!-- Importa o XUMM SDK -->
   <script src="https://unpkg.com/xumm-sdk/dist/xumm-sdk.min.js"></script>
@@ -16,7 +16,11 @@
       --pokemon-black: #333333;
     }
     /* Reset básico */
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
     body {
       font-family: 'Press Start 2P', cursive;
       background: linear-gradient(135deg, var(--pokemon-yellow), var(--pokemon-blue));
@@ -26,11 +30,12 @@
       position: relative;
       min-height: 100vh;
     }
+    /* Pseudo-elemento para imagem de fundo semi-transparente */
     body::before {
       content: "";
       position: absolute;
       inset: 0;
-      /* Certifique-se de que o arquivo esteja no caminho correto */
+      /* VERIFIQUE: o arquivo "assets/background.png" deve estar no caminho correto */
       background: url("assets/background.png") no-repeat center center / cover;
       opacity: 0.5;
       z-index: -1;
@@ -54,12 +59,18 @@
       background-color: #ffd62f;
       transform: translateY(-3px);
     }
-    .cta-button.disabled { pointer-events: none; opacity: 0.6; }
-    #connect-wallet { position: fixed; top: 20px; right: 20px; z-index: 100; }
-    
+    .cta-button.disabled {
+      pointer-events: none;
+      opacity: 0.6;
+    }
+    #connect-wallet {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 100;
+    }
     .section { display: none; }
     #lobby { display: block; }
-    
     .container {
       max-width: 1000px;
       margin: 40px auto;
@@ -71,16 +82,13 @@
       border: 8px double var(--pokemon-red);
       border-image: linear-gradient(135deg, var(--pokemon-red) 0%, var(--pokemon-yellow) 40%, var(--pokemon-blue) 100%) 1;
     }
-    
     h1 {
       font-size: 2.5rem;
       margin-bottom: 20px;
       color: var(--pokemon-red);
       text-shadow: 3px 3px 0 var(--pokemon-blue);
     }
-    
     p { font-size: 1rem; margin-bottom: 20px; color: #333; }
-    
     /* Lobby */
     #lobby .room-form { margin-top: 20px; text-align: center; }
     #lobby .room-form p.cost-info { font-size: 1rem; margin-bottom: 20px; font-weight: bold; }
@@ -117,7 +125,6 @@
       transition: background-color 0.2s, transform 0.2s;
     }
     .lobby-entry .join-btn:hover { background-color: #ffd62f; transform: translateY(-3px); }
-    
     /* Game (Batalha) */
     #game .battle-container {
       display: flex;
@@ -188,7 +195,7 @@
       align-self: center;
     }
     
-    /* Caixas colapsáveis (Regras e Ranking) */
+    /* Caixas colapsáveis para Regras e Ranking */
     .collapsible {
       margin-top: 30px;
       background: rgba(255,255,255,0.8);
@@ -200,9 +207,7 @@
       color: #333;
       box-shadow: 0 0 10px rgba(0,0,0,0.3);
     }
-    .collapsible .box-content {
-      display: none;
-    }
+    .collapsible .box-content { display: none; }
     .collapsible .collapsible-header {
       display: flex;
       justify-content: space-between;
@@ -211,14 +216,8 @@
       user-select: none;
       margin-bottom: 10px;
     }
-    .collapsible .collapsible-header h2 {
-      font-size: 1.8rem;
-      margin: 0;
-    }
-    .collapsible .collapsible-header span.toggle-icon {
-      font-weight: bold;
-      font-size: 1.2rem;
-    }
+    .collapsible .collapsible-header h2 { font-size: 1.8rem; margin: 0; }
+    .collapsible .collapsible-header span.toggle-icon { font-weight: bold; font-size: 1.2rem; }
     
     .rules-box { border-color: var(--pokemon-red); }
     .rules-box h2 { color: var(--pokemon-red); text-shadow: 2px 2px 0 var(--pokemon-blue); }
@@ -247,10 +246,12 @@
   <!-- Botão para Conectar Carteira -->
   <a href="#" id="connect-wallet" class="cta-button">Connect Wallet</a>
   
-  <!-- Seção Lobby -->
+  <!-- Seção Lobby: Exibida inicialmente -->
   <div id="lobby" class="container section">
     <h1>Abrir Sala de Batalha</h1>
-    <p>Abra sua sala para aguardar outro treinador Pokémon.<br>O custo fixo para abrir ou entrar na sala é de <strong>1.0 XRP</strong>.</p>
+    <p>Abra sua sala para aguardar outro treinador Pokémon.<br>
+       O custo fixo para abrir ou entrar na sala é de <strong>1.0 XRP</strong>.
+    </p>
     <div class="room-form" style="text-align: center;">
       <a href="#" id="create-room" class="cta-button">Abrir Sala</a>
     </div>
@@ -272,13 +273,13 @@
     </div>
   </div>
   
-  <!-- Seção Game -->
+  <!-- Seção Game: Oculta inicialmente -->
   <div id="game" class="container section" style="display: none;">
     <h1>Batalha Online</h1>
     <p>Bem-vindo à sala de batalha! Aguarde outro treinador ou inicie sua batalha.</p>
     
     <div class="battle-container">
-      <!-- Treinador 1 -->
+      <!-- Área do Treinador 1 -->
       <div class="trainer" id="trainer1">
         <h2>Treinador 1</h2>
         <div class="nft-grid" id="nft-grid-1">
@@ -289,7 +290,7 @@
       <!-- Elemento central "VS" -->
       <div class="vs">VS</div>
       
-      <!-- Treinador 2 -->
+      <!-- Área do Treinador 2 -->
       <div class="trainer" id="trainer2">
         <h2>Treinador 2</h2>
         <div class="nft-grid" id="nft-grid-2">
@@ -298,7 +299,6 @@
       </div>
     </div>
     
-    <!-- Botão "Batalhar!" -->
     <div style="margin-top: 30px;">
       <a href="#" id="battle-button" class="cta-button disabled">Batalhar!</a>
     </div>
@@ -336,10 +336,12 @@
     </div>
   </div>
   
+  <!-- Coloque seu script aqui, após a importação do SDK e o carregamento completo do DOM -->
   <script>
-    // Inicializa o XUMM SDK – substitua pelos seus valores reais
+    // Inicializa o XUMM SDK com sua API Key e API Secret
     const xumm = new XummSdk("46c2e7c6-c005-4a6d-bef7-e0b6090bc9bd", "2d1e7336-5bc5-4035-8512-dc0f6799a7c4");
     
+    // Conexão com Carteira
     document.getElementById("connect-wallet").addEventListener("click", async (e) => {
       e.preventDefault();
       try {
@@ -351,7 +353,7 @@
         const result = await payload.resolved;
         if (result.signed) {
           alert("Carteira conectada! Endereço: " + result.account);
-          // Implemente aqui a lógica para carregar os NFTs do usuário
+          // Carregue os NFTs do usuário aqui
         } else {
           alert("Conexão cancelada.");
         }
@@ -361,7 +363,7 @@
       }
     });
     
-    /* Simulação de NFTs para testes (remova ou substitua em produção) */
+    /* Simulação de inserção de NFTs para teste (remova em produção) */
     let selection1 = null;
     let selection2 = null;
     
@@ -404,7 +406,7 @@
       });
     }
     
-    // Simulação de inserção de NFTs (para teste – remova em produção)
+    // Simulação de inserção de NFTs para teste (remova em produção)
     simulateNFTInsertion(nftGrid1, "<strong>Charmander</strong>");
     simulateNFTInsertion(nftGrid1, "<strong>Bulbasaur</strong>");
     simulateNFTInsertion(nftGrid1, "<strong>Squirtle</strong>");
@@ -412,6 +414,7 @@
     simulateNFTInsertion(nftGrid2, "<strong>Jigglypuff</strong>");
     simulateNFTInsertion(nftGrid2, "<strong>Meowth</strong>");
     
+    // Função de exemplo para calcular o vencedor (simulação)
     function calculateWinner() {
       return Math.random() < 0.5 ? "Treinador 1" : "Treinador 2";
     }
@@ -429,7 +432,7 @@
       }
     });
     
-    // Lógica para as caixas colapsáveis (Regras e Ranking)
+    // Lógica para tornar as caixas colapsáveis (Regras e Ranking)
     document.querySelectorAll('.collapsible .collapsible-header').forEach(header => {
       header.addEventListener('click', () => {
         const content = header.nextElementSibling;
