@@ -348,53 +348,61 @@
       checkExistingConnection();
       
       // Função para conectar a carteira XUMM
-      async function connectXummWallet() {
-        try {
-          // Desabilitar o botão enquanto processamos
-          connectWalletBtn.classList.add('disabled');
-          connectWalletBtn.textContent = "Conectando...";
-          
-          // Criar um objeto de payload XUMM SDK
-const xumm = new Xumm('46c2e7c6-c005-4a6d-bef7-e0b6090bc9bd', {
-  implicit: true,
-  redirectUrl: window.location.href // Usa a URL atual como redirecionamento
-});
-          
-          // Criar uma solicitação de sign-in
-          const request = await xumm.authorize();
-          
-          // Quando a solicitação for resolvida
-          if (request.success) {
-            console.log("Carteira conectada com sucesso!");
-            
-            // Obter o endereço da carteira e o token
-            userToken = request.token;
-            userAddress = request.me.account;
-            
-            // Armazenar informações da carteira
-            localStorage.setItem('xummUserToken', userToken);
-            localStorage.setItem('xummWalletAddress', userAddress);
-            
-            // Atualizar a interface do usuário
-            connectWalletBtn.textContent = "Carteira Conectada";
-            alert("Carteira conectada! Endereço: " + userAddress);
-            
-            // Aqui você poderia chamar uma função para carregar os NFTs do usuário
-            // loadUserNFTs(userAddress);
-          } else {
-            console.log("Conexão cancelada ou falhou");
-            connectWalletBtn.textContent = "Connect Wallet";
-            alert("Conexão cancelada.");
-          }
-        } catch (error) {
-          console.error("Erro ao conectar carteira:", error);
-          connectWalletBtn.textContent = "Connect Wallet";
-          alert("Erro ao conectar carteira: " + error.message);
-        } finally {
-          connectWalletBtn.classList.remove('disabled');
-        }
-      }
+async function connectXummWallet() {
+  try {
+    // Desabilitar o botão enquanto processamos
+    connectWalletBtn.classList.add('disabled');
+    connectWalletBtn.textContent = "Conectando...";
+    
+    // Criar um objeto de payload XUMM SDK com mais detalhes
+    const xumm = new Xumm('46c2e7c6-c005-4a6d-bef7-e0b6090bc9bd');
+    
+    console.log("Iniciando solicitação de autorização XUMM...");
+    
+    // Criar uma solicitação de sign-in com timeout maior
+    const request = await xumm.authorize({
+      redirectUrl: window.location.href,
+      pushDisabled: false  // Permitir notificações push para usuários XUMM
+    });
+    
+    console.log("Resposta da solicitação:", request);
+    
+    // Tratamento mais detalhado da resposta
+    if (request && request.success) {
+      console.log("Carteira conectada com sucesso!");
       
+      // Obter o endereço da carteira e o token
+      userToken = request.token;
+      userAddress = request.me.account;
+      
+      // Armazenar informações da carteira
+      localStorage.setItem('xummUserToken', userToken);
+      localStorage.setItem('xummWalletAddress', userAddress);
+      
+      // Atualizar a interface do usuário
+      connectWalletBtn.textContent = "Carteira Conectada";
+      alert("Carteira conectada! Endereço: " + userAddress);
+      
+      // Aqui você poderia chamar uma função para carregar os NFTs do usuário
+      // loadUserNFTs(userAddress);
+    } else {
+      // Exibir detalhes sobre a falha
+      console.error("Falha na conexão:", request);
+      let errorMessage = "Conexão cancelada.";
+      if (request && request.reason) {
+        errorMessage += " Motivo: " + request.reason;
+      }
+      alert(errorMessage);
+    }
+  } catch (error) {
+    // Log detalhado de erros
+    console.error("Erro detalhado:", error);
+    alert("Erro ao conectar carteira: " + (error.message || "Erro desconhecido"));
+  } finally {
+    connectWalletBtn.classList.remove('disabled');
+    connectWalletBtn.textContent = "Connect Wallet";
+  }
+}      
       // Função para desconectar a carteira
       function disconnectWallet() {
         userToken = null;
