@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>XRPokémon - Lobby & Batalha</title>
+  <!-- Importa a fonte "Press Start 2P" -->
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <!-- Importa o XUMM SDK -->
+  <script src="https://unpkg.com/xumm-sdk/dist/xumm-sdk.min.js"></script>
+  <style>
+    :root {
+      --pokemon-red: #ee1515;
+      --pokemon-blue: #3b5ba7;
+      --pokemon-yellow: #ffcb05;
+      --pokemon-black: #333333;
+    }
+    /* Reset básico */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Press Start 2P', cursive;
+      background: linear-gradient(135deg, var(--pokemon-yellow), var(--pokemon-blue));
+      background-size: cover;
+      color: #333;
+      padding: 20px;
+      position: relative;
+      min-height: 100vh;
+    }
+    body::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      /* Certifique-se de que o arquivo esteja no caminho correto */
+      background: url("assets/background.png") no-repeat center center / cover;
+      opacity: 0.5;
+      z-index: -1;
+    }
+    .cta-button {
+      display: inline-block;
+      background-color: #ffcb05;
+      color: #000;
+      border: 3px solid #000;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 1rem;
+      text-decoration: none;
+      text-transform: uppercase;
+      padding: 12px 24px;
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.2s;
+      border-radius: 4px;
+      text-align: center;
+    }
+    .cta-button:hover {
+      background-color: #ffd62f;
+      transform: translateY(-3px);
+    }
+    .cta-button.disabled { pointer-events: none; opacity: 0.6; }
+    #connect-wallet { position: fixed; top: 20px; right: 20px; z-index: 100; }
+    
+    .section { display: none; }
+    #lobby { display: block; }
+    
+    .container {
+      max-width: 1000px;
+      margin: 40px auto;
+      background: linear-gradient(135deg, rgba(255,255,255,0.5), rgba(249,249,249,0.5));
+      border-radius: 20px;
+      padding: 30px;
+      text-align: center;
+      box-shadow: 0 0 30px rgba(0,0,0,0.4);
+      border: 8px double var(--pokemon-red);
+      border-image: linear-gradient(135deg, var(--pokemon-red) 0%, var(--pokemon-yellow) 40%, var(--pokemon-blue) 100%) 1;
+    }
+    
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+      color: var(--pokemon-red);
+      text-shadow: 3px 3px 0 var(--pokemon-blue);
+    }
+    
+    p { font-size: 1rem; margin-bottom: 20px; color: #333; }
+    
+    /* Lobby */
+    #lobby .room-form { margin-top: 20px; text-align: center; }
+    #lobby .room-form p.cost-info { font-size: 1rem; margin-bottom: 20px; font-weight: bold; }
+    .lobbies-box {
+      margin-top: 30px;
+      background: rgba(255,255,255,0.8);
+      border: 3px solid var(--pokemon-blue);
+      border-radius: 10px;
+      padding: 20px;
+      text-align: left;
+      font-family: 'Press Start 2P', cursive;
+      color: #333;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    }
+    .lobbies-box h2 { margin-bottom: 15px; font-size: 1.8rem; color: var(--pokemon-blue); text-shadow: 2px 2px 0 var(--pokemon-yellow); }
+    .lobby-entry {
+      padding: 10px;
+      border-bottom: 1px solid #aaa;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.9rem;
+    }
+    .lobby-entry:last-child { border-bottom: none; }
+    .lobby-entry .join-btn {
+      font-size: 0.9rem;
+      padding: 6px 12px;
+      background-color: #ffcb05;
+      color: #000;
+      border: 3px solid #000;
+      border-radius: 4px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.2s;
+    }
+    .lobby-entry .join-btn:hover { background-color: #ffd62f; transform: translateY(-3px); }
+    
+    /* Game (Batalha) */
+    #game .battle-container {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      justify-content: space-around;
+      margin: 30px 0;
+      gap: 20px;
+      position: relative;
+    }
+    #game .trainer {
+      width: 40%;
+      background: linear-gradient(135deg, rgba(249,249,249,0.5), rgba(255,255,255,0.5));
+      border: 4px double var(--pokemon-red);
+      border-image: linear-gradient(135deg, var(--pokemon-red), var(--pokemon-yellow), var(--pokemon-blue)) 1;
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.4);
+      position: relative;
+    }
+    #game .trainer h2 {
+      font-size: 1.8rem;
+      margin-bottom: 15px;
+      color: var(--pokemon-red);
+      text-shadow: 2px 2px 0 var(--pokemon-blue);
+    }
+    #game .nft-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 10px;
+      max-height: 300px;
+      overflow-y: auto;
+      padding-right: 5px;
+      border-top: 1px dashed #aaa;
+      margin-top: 15px;
+      padding-top: 10px;
+    }
+    #game .nft {
+      position: relative;
+      width: 100%;
+      min-height: 120px;
+      border: 4px solid;
+      border-image: linear-gradient(45deg, var(--pokemon-yellow), var(--pokemon-red), var(--pokemon-blue)) 1;
+      border-radius: 15px;
+      background: rgba(255,255,255,0.8);
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    #game .nft:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 15px rgba(255,203,5,0.8);
+    }
+    #game .nft.selected {
+      border-image: linear-gradient(45deg, var(--pokemon-yellow), var(--pokemon-yellow), var(--pokemon-yellow)) 1;
+      box-shadow: 0 0 20px var(--pokemon-yellow);
+    }
+    #game .vs {
+      font-size: 4rem;
+      font-family: 'Press Start 2P', cursive;
+      color: var(--pokemon-red);
+      text-shadow: 3px 3px 0 #fff;
+      align-self: center;
+    }
+    
+    /* Caixas colapsáveis (Regras e Ranking) */
+    .collapsible {
+      margin-top: 30px;
+      background: rgba(255,255,255,0.8);
+      border: 3px solid;
+      border-radius: 10px;
+      padding: 10px;
+      text-align: left;
+      font-family: 'Press Start 2P', cursive;
+      color: #333;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    }
+    .collapsible .box-content {
+      display: none;
+    }
+    .collapsible .collapsible-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+      margin-bottom: 10px;
+    }
+    .collapsible .collapsible-header h2 {
+      font-size: 1.8rem;
+      margin: 0;
+    }
+    .collapsible .collapsible-header span.toggle-icon {
+      font-weight: bold;
+      font-size: 1.2rem;
+    }
+    
+    .rules-box { border-color: var(--pokemon-red); }
+    .rules-box h2 { color: var(--pokemon-red); text-shadow: 2px 2px 0 var(--pokemon-blue); }
+    .rules-box p { font-size: 0.9rem; margin-bottom: 10px; }
+    
+    .ranking-box { border-color: var(--pokemon-blue); }
+    .ranking-box h2 { color: var(--pokemon-blue); text-shadow: 2px 2px 0 var(--pokemon-yellow); }
+    .ranking-box p { font-size: 0.9rem; margin-bottom: 10px; }
+    
+    .vs {
+      font-size: 4rem;
+      font-family: 'Press Start 2P', cursive;
+      color: var(--pokemon-red);
+      text-shadow: 3px 3px 0 #fff;
+      align-self: center;
+    }
+    
+    /* Responsividade */
+    @media (max-width: 768px) {
+      .trainer { width: 90%; }
+      .vs { font-size: 3rem; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Botão para Conectar Carteira -->
+  <a href="#" id="connect-wallet" class="cta-button">Connect Wallet</a>
+  
+  <!-- Seção Lobby -->
+  <div id="lobby" class="container section">
+    <h1>Abrir Sala de Batalha</h1>
+    <p>Abra sua sala para aguardar outro treinador Pokémon.<br>O custo fixo para abrir ou entrar na sala é de <strong>1.0 XRP</strong>.</p>
+    <div class="room-form" style="text-align: center;">
+      <a href="#" id="create-room" class="cta-button">Abrir Sala</a>
+    </div>
+    <!-- Caixa listando as lobbies disponíveis -->
+    <div class="lobbies-box">
+      <h2>Salas Disponíveis</h2>
+      <div class="lobby-entry">
+        <span>Sala 1 - 1.0 XRP</span>
+        <a href="#" class="cta-button join-btn">Entrar</a>
+      </div>
+      <div class="lobby-entry">
+        <span>Sala 2 - 1.0 XRP</span>
+        <a href="#" class="cta-button join-btn">Entrar</a>
+      </div>
+      <div class="lobby-entry">
+        <span>Sala 3 - 1.0 XRP</span>
+        <a href="#" class="cta-button join-btn">Entrar</a>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Seção Game -->
+  <div id="game" class="container section" style="display: none;">
+    <h1>Batalha Online</h1>
+    <p>Bem-vindo à sala de batalha! Aguarde outro treinador ou inicie sua batalha.</p>
+    
+    <div class="battle-container">
+      <!-- Treinador 1 -->
+      <div class="trainer" id="trainer1">
+        <h2>Treinador 1</h2>
+        <div class="nft-grid" id="nft-grid-1">
+          <!-- NFTs serão carregados dinamicamente -->
+        </div>
+      </div>
+      
+      <!-- Elemento central "VS" -->
+      <div class="vs">VS</div>
+      
+      <!-- Treinador 2 -->
+      <div class="trainer" id="trainer2">
+        <h2>Treinador 2</h2>
+        <div class="nft-grid" id="nft-grid-2">
+          <!-- NFTs serão carregados dinamicamente -->
+        </div>
+      </div>
+    </div>
+    
+    <!-- Botão "Batalhar!" -->
+    <div style="margin-top: 30px;">
+      <a href="#" id="battle-button" class="cta-button disabled">Batalhar!</a>
+    </div>
+    
+    <div id="battle-result"></div>
+    
+    <!-- Caixa colapsável para Regras do Jogo -->
+    <div class="rules-box collapsible">
+      <div class="collapsible-header">
+        <h2>Regras do Jogo</h2>
+        <span class="toggle-icon">[+]</span>
+      </div>
+      <div class="box-content">
+        <p>1. Cada treinador pode utilizar apenas um único NFT para a batalha.</p>
+        <p>2. Os NFTs devem ser obtidos via conexão com a carteira XRP.</p>
+        <p>3. O vencedor é determinado por uma fórmula probabilística baseada nos atributos do NFT.</p>
+        <p>4. Em caso de empate, o vencedor será escolhido aleatoriamente.</p>
+        <p>5. Este jogo é para fins de entretenimento; as regras podem ser atualizadas conforme necessário.</p>
+      </div>
+    </div>
+    
+    <!-- Caixa colapsável para Sistema de Pontuação -->
+    <div class="ranking-box collapsible">
+      <div class="collapsible-header">
+        <h2>Sistema de Pontuação</h2>
+        <span class="toggle-icon">[+]</span>
+      </div>
+      <div class="box-content">
+        <p>• Cada NFT possui atributos como ataque, defesa e HP que determinam seu "score".</p>
+        <p>• O score total é calculado multiplicando a soma dos atributos pela raridade do NFT.</p>
+        <p>• Durante a batalha, a probabilidade de vitória é calculada com base neste score.</p>
+        <p>• Em caso de empate, o vencedor é definido de forma aleatória.</p>
+        <p>• O ranking dos treinadores será baseado na quantidade e qualidade dos NFTs vencedores ao longo do tempo.</p>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // Inicializa o XUMM SDK – substitua pelos seus valores reais
+    const xumm = new XummSdk("46c2e7c6-c005-4a6d-bef7-e0b6090bc9bd", "2d1e7336-5bc5-4035-8512-dc0f6799a7c4");
+    
+    document.getElementById("connect-wallet").addEventListener("click", async (e) => {
+      e.preventDefault();
+      try {
+        const payload = await xumm.payload.create({
+          txjson: { TransactionType: "SignIn" }
+        });
+        console.log("Payload criado:", payload);
+        window.open(payload.next.always, "_blank");
+        const result = await payload.resolved;
+        if (result.signed) {
+          alert("Carteira conectada! Endereço: " + result.account);
+          // Implemente aqui a lógica para carregar os NFTs do usuário
+        } else {
+          alert("Conexão cancelada.");
+        }
+      } catch (error) {
+        console.error("Erro ao conectar carteira:", error);
+        alert("Erro ao conectar carteira.");
+      }
+    });
+    
+    /* Simulação de NFTs para testes (remova ou substitua em produção) */
+    let selection1 = null;
+    let selection2 = null;
+    
+    const nftGrid1 = document.getElementById('nft-grid-1');
+    const nftGrid2 = document.getElementById('nft-grid-2');
+    const battleButton = document.getElementById('battle-button');
+    const battleResult = document.getElementById('battle-result');
+    
+    function simulateNFTInsertion(grid, contentHTML) {
+      const nftElement = document.createElement('div');
+      nftElement.classList.add('nft');
+      nftElement.innerHTML = contentHTML;
+      grid.appendChild(nftElement);
+      
+      nftElement.addEventListener('click', () => {
+        if (grid.id === 'nft-grid-1') {
+          if (selection1 === nftElement) {
+            selection1 = null;
+            nftElement.classList.remove('selected');
+          } else {
+            Array.from(nftGrid1.children).forEach(el => el.classList.remove('selected'));
+            selection1 = nftElement;
+            nftElement.classList.add('selected');
+          }
+        } else if (grid.id === 'nft-grid-2') {
+          if (selection2 === nftElement) {
+            selection2 = null;
+            nftElement.classList.remove('selected');
+          } else {
+            Array.from(nftGrid2.children).forEach(el => el.classList.remove('selected'));
+            selection2 = nftElement;
+            nftElement.classList.add('selected');
+          }
+        }
+        if (selection1 && selection2) {
+          battleButton.classList.remove('disabled');
+        } else {
+          battleButton.classList.add('disabled');
+        }
+      });
+    }
+    
+    // Simulação de inserção de NFTs (para teste – remova em produção)
+    simulateNFTInsertion(nftGrid1, "<strong>Charmander</strong>");
+    simulateNFTInsertion(nftGrid1, "<strong>Bulbasaur</strong>");
+    simulateNFTInsertion(nftGrid1, "<strong>Squirtle</strong>");
+    simulateNFTInsertion(nftGrid2, "<strong>Pikachu</strong>");
+    simulateNFTInsertion(nftGrid2, "<strong>Jigglypuff</strong>");
+    simulateNFTInsertion(nftGrid2, "<strong>Meowth</strong>");
+    
+    function calculateWinner() {
+      return Math.random() < 0.5 ? "Treinador 1" : "Treinador 2";
+    }
+    
+    battleButton.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (selection1 && selection2 && !battleButton.classList.contains('disabled')) {
+        const winner = calculateWinner();
+        battleResult.innerHTML = `<p>O vencedor é: ${winner}!</p>`;
+        selection1.classList.remove('selected');
+        selection2.classList.remove('selected');
+        selection1 = null;
+        selection2 = null;
+        battleButton.classList.add('disabled');
+      }
+    });
+    
+    // Lógica para as caixas colapsáveis (Regras e Ranking)
+    document.querySelectorAll('.collapsible .collapsible-header').forEach(header => {
+      header.addEventListener('click', () => {
+        const content = header.nextElementSibling;
+        const toggleIcon = header.querySelector('.toggle-icon');
+        if (content.style.display === 'block') {
+          content.style.display = 'none';
+          toggleIcon.textContent = '[+]';
+        } else {
+          content.style.display = 'block';
+          toggleIcon.textContent = '[-]';
+        }
+      });
+    });
+    
+    // Lógica para alternar da seção Lobby para a seção Game
+    document.getElementById("create-room").addEventListener("click", function(e) {
+      e.preventDefault();
+      const roomCost = 1.0; // Custo fixo
+      alert("Sala aberta com sucesso! Custo: " + roomCost + " XRP. Aguarde outro treinador ou escolha uma sala disponível.");
+      document.getElementById("lobby").style.display = "none";
+      document.getElementById("game").style.display = "block";
+    });
+    
+    // Lógica para os botões "Entrar" nos lobbies disponíveis (simulação)
+    document.querySelectorAll('.lobby-entry .join-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        alert("Você entrou na sala! Custo: 1.0 XRP.");
+        document.getElementById("lobby").style.display = "none";
+        document.getElementById("game").style.display = "block";
+      });
+    });
+  </script>
+</body>
+</html>
