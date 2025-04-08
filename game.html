@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>XRPokémon - Lobby & Batalha</title>
+  <title>XRPokémon - Lobby</title>
   <!-- Importa a fonte "Press Start 2P" -->
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   <!-- Importa o XUMM SDK Corrigido -->
@@ -239,40 +239,40 @@
   
   <!-- Seção Lobby (inicialmente visível) -->
   <div id="lobby" class="container section">
-    <h1>Abrir Sala de Batalha</h1>
-    <p>Abra sua sala para aguardar outro treinador Pokémon.<br>
-       O custo fixo para abrir ou entrar na sala é de <strong>1.0 XRP</strong>.
+    <h1>XRPokemon - Battle Arena</h1>
+    <p>Open your room to wait for another XRPokemon Trainer.<br>
+       The fixed cost to open or join the room is <strong>1.0 XRP</strong>.
     </p>
     <div class="room-form" style="text-align: center;">
-      <a href="#" id="create-room" class="cta-button">Abrir Sala</a>
+      <a href="#" id="create-room" class="cta-button">Open lobby</a>
     </div>
     <!-- Caixa listando as lobbies disponíveis -->
     <div class="lobbies-box">
-      <h2>Salas Disponíveis</h2>
+      <h2>Available Lobbies</h2>
       <div class="lobby-entry">
-        <span>Sala 1 - 1.0 XRP</span>
-        <a href="#" class="cta-button join-btn">Entrar</a>
+        <span>Lobby 1 - 1.0 XRP</span>
+        <a href="#" class="cta-button join-btn">Go!</a>
       </div>
       <div class="lobby-entry">
-        <span>Sala 2 - 1.0 XRP</span>
-        <a href="#" class="cta-button join-btn">Entrar</a>
+        <span>Lobby 2 - 1.0 XRP</span>
+        <a href="#" class="cta-button join-btn">Go!</a>
       </div>
       <div class="lobby-entry">
-        <span>Sala 3 - 1.0 XRP</span>
-        <a href="#" class="cta-button join-btn">Entrar</a>
+        <span>Lobby 3 - 1.0 XRP</span>
+        <a href="#" class="cta-button join-btn">Go!</a>
       </div>
     </div>
   </div>
   
   <!-- Seção Game (oculta inicialmente) -->
   <div id="game" class="container section" style="display: none;">
-    <h1>Batalha Online</h1>
-    <p>Bem-vindo à sala de batalha! Aguarde outro treinador ou inicie sua batalha.</p>
+    <h1>XRPokemon Battlearena</h1>
+    <p>Welcome to the battle room! Wait for another trainer or start your battle!</p>
     
     <div class="battle-container">
       <!-- Treinador 1 -->
       <div class="trainer" id="trainer1">
-        <h2>Treinador 1</h2>
+        <h2>Trainer 1</h2>
         <div class="nft-grid" id="nft-grid-1">
           <!-- Os NFTs serão carregados dinamicamente -->
         </div>
@@ -283,7 +283,7 @@
       
       <!-- Treinador 2 -->
       <div class="trainer" id="trainer2">
-        <h2>Treinador 2</h2>
+        <h2>Trainer 2</h2>
         <div class="nft-grid" id="nft-grid-2">
           <!-- Os NFTs serão carregados dinamicamente -->
         </div>
@@ -291,7 +291,7 @@
     </div>
     
     <div style="margin-top: 30px;">
-      <a href="#" id="battle-button" class="cta-button disabled">Batalhar!</a>
+      <a href="#" id="battle-button" class="cta-button disabled">Battle!</a>
     </div>
     
     <div id="battle-result"></div>
@@ -299,7 +299,7 @@
     <!-- Caixa colapsável para Regras do Jogo -->
     <div class="rules-box collapsible">
       <div class="collapsible-header">
-        <h2>Regras do Jogo</h2>
+        <h2>Game Rules</h2>
         <span class="toggle-icon">[+]</span>
       </div>
       <div class="box-content">
@@ -314,7 +314,7 @@
     <!-- Caixa colapsável para Sistema de Pontuação -->
     <div class="ranking-box collapsible">
       <div class="collapsible-header">
-        <h2>Sistema de Pontuação</h2>
+        <h2>Leaderboard</h2>
         <span class="toggle-icon">[+]</span>
       </div>
       <div class="box-content">
