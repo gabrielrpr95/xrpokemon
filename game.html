@@ -71,12 +71,14 @@
       border: 8px double var(--pokemon-red);
       border-image: linear-gradient(135deg, var(--pokemon-red) 0%, var(--pokemon-yellow) 40%, var(--pokemon-blue) 100%) 1;
     }
+    
     h1 {
       font-size: 2.5rem;
       margin-bottom: 20px;
       color: var(--pokemon-red);
       text-shadow: 3px 3px 0 var(--pokemon-blue);
     }
+    
     p { font-size: 1rem; margin-bottom: 20px; color: #333; }
     
     /* Seção Lobby */
@@ -186,7 +188,7 @@
       align-self: center;
     }
     
-    /* Caixas colapsáveis (para Regras e Ranking) */
+    /* Caixas colapsáveis (para Regras e Leaderboard) */
     .collapsible {
       margin-top: 30px;
       background: rgba(255,255,255,0.8);
@@ -226,7 +228,6 @@
       align-self: center;
     }
     
-    /* Responsividade */
     @media (max-width: 768px) {
       .trainer { width: 90%; }
       .vs { font-size: 3rem; }
@@ -270,22 +271,22 @@
     <p>Welcome to the battle room! Wait for another trainer or start your battle!</p>
     
     <div class="battle-container">
-      <!-- Treinador 1 -->
+      <!-- Trainer 1 -->
       <div class="trainer" id="trainer1">
         <h2>Trainer 1</h2>
         <div class="nft-grid" id="nft-grid-1">
-          <!-- Os NFTs serão carregados dinamicamente -->
+          <!-- NFTs will be dynamically loaded -->
         </div>
       </div>
       
-      <!-- Elemento central "VS" -->
+      <!-- Central "VS" element -->
       <div class="vs">VS</div>
       
-      <!-- Treinador 2 -->
+      <!-- Trainer 2 -->
       <div class="trainer" id="trainer2">
         <h2>Trainer 2</h2>
         <div class="nft-grid" id="nft-grid-2">
-          <!-- Os NFTs serão carregados dinamicamente -->
+          <!-- NFTs will be dynamically loaded -->
         </div>
       </div>
     </div>
@@ -296,30 +297,38 @@
     
     <div id="battle-result"></div>
     
-    <!-- Caixa colapsável para Regras do Jogo -->
+    <!-- Collapsible box for Game Rules -->
     <div class="rules-box collapsible">
       <div class="collapsible-header">
         <h2>Game Rules</h2>
         <span class="toggle-icon">[+]</span>
       </div>
       <div class="box-content">
-        <p>1. </p>
+        <p>1. Each trainer may use only one NFT per battle.</p>
+        <p>2. NFTs must be obtained by connecting your XRP wallet.</p>
+        <p>3. The winner is determined probabilistically based on NFT attributes.</p>
+        <p>4. In case of a tie, the winner is chosen at random.</p>
+        <p>5. This game is for entertainment; rules may be updated.</p>
       </div>
     </div>
     
-    <!-- Caixa colapsável para Sistema de Pontuação -->
+    <!-- Collapsible box for Leaderboard -->
     <div class="ranking-box collapsible">
       <div class="collapsible-header">
         <h2>Leaderboard</h2>
         <span class="toggle-icon">[+]</span>
       </div>
       <div class="box-content">
-        <p>• </p>
+        <p>• Each NFT has attributes (attack, defense, HP) that determine its score.</p>
+        <p>• Total score is calculated by multiplying the sum of attributes by the NFT's rarity.</p>
+        <p>• During battle, the chance of victory is based on this score.</p>
+        <p>• In case of a tie, the winner is chosen randomly.</p>
+        <p>• The leaderboard is based on the quality and number of winning NFTs over time.</p>
       </div>
     </div>
   </div>
   
-  <!-- Nosso código JavaScript – colocado no final para garantir que tudo já foi carregado -->
+  <!-- Código JavaScript -->
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       // Variáveis para armazenar informações da carteira conectada
@@ -329,11 +338,10 @@
       // Botão de conexão da carteira
       const connectWalletBtn = document.getElementById("connect-wallet");
       
-      // Verifica se já existe uma conexão salva no localStorage
+      // Verifica se já existe conexão salva no localStorage
       function checkExistingConnection() {
         const savedToken = localStorage.getItem('xummUserToken');
         const savedAddress = localStorage.getItem('xummWalletAddress');
-        
         if (savedToken && savedAddress) {
           userToken = savedToken;
           userAddress = savedAddress;
@@ -343,89 +351,64 @@
         }
         return false;
       }
-      
-      // Inicializa a verificação de conexão existente
       checkExistingConnection();
       
-      // Função para conectar a carteira XUMM
-async function connectXummWallet() {
-  try {
-    // Desabilitar o botão enquanto processamos
-    connectWalletBtn.classList.add('disabled');
-    connectWalletBtn.textContent = "Conectando...";
-    
-    console.log("Iniciando solicitação de autorização XUMM...");
-    
-    // Criar uma nova instância do XUMM SDK com configuração mais simples
-    const xumm = new Xumm('46c2e7c6-c005-4a6d-bef7-e0b6090bc9bd');
-    
-    // Configurar a autorização com opções específicas
-    const request = await xumm.authorize({
-      redirectUrl: window.location.origin + window.location.pathname,
-      returnErrors: true
-    });
-    
-    // Log simplificado para evitar estrutura circular
-    console.log("Resposta da solicitação (segura):", {
-      success: request?.success,
-      hasToken: !!request?.token,
-      hasAccount: !!request?.me?.account
-    });
-    
-    // Verificar se a solicitação foi bem-sucedida
-    if (request && request.success === true && request.me && request.me.account) {
-      // Obter o endereço da carteira e o token
-      userToken = request.token;
-      userAddress = request.me.account;
-      
-      // Armazenar informações da carteira
-      localStorage.setItem('xummUserToken', userToken);
-      localStorage.setItem('xummWalletAddress', userAddress);
-      
-      // Atualizar a interface do usuário
-      connectWalletBtn.textContent = "Carteira Conectada";
-      alert("Carteira conectada! Endereço: " + userAddress);
-      
-      return true;
-    } else {
-      console.error("Falha na conexão:", {
-        success: request?.success,
-        error: request?.error
-      });
-      
-      // Mensagem simplificada de erro
-      alert("Não foi possível completar a conexão com a carteira. Por favor, tente novamente.");
-      
-      return false;
-    }
-  } catch (error) {
-    console.error("Erro ao conectar carteira:", error.message);
-    alert("Erro ao conectar carteira. Por favor, verifique o console para mais detalhes.");
-    return false;
-  } finally {
-    connectWalletBtn.classList.remove('disabled');
-    connectWalletBtn.textContent = "Connect Wallet";
-  }
-}
-      // Função para desconectar a carteira
-      function disconnectWallet() {
-        userToken = null;
-        userAddress = null;
-        localStorage.removeItem('xummUserToken');
-        localStorage.removeItem('xummWalletAddress');
-        connectWalletBtn.textContent = "Connect Wallet";
-        alert("Carteira desconectada!");
+      // Função para conectar a carteira via XUMM usando authorize()
+      async function connectXummWallet() {
+        try {
+          connectWalletBtn.classList.add('disabled');
+          connectWalletBtn.textContent = "Conectando...";
+          console.log("Iniciando solicitação de autorização XUMM...");
+          
+          // Cria uma nova instância do XUMM SDK (use API Key e API Secret se necessário)
+          const xumm = new XummSdk("46c2e7c6-c005-4a6d-bef7-e0b6090bc9bd", "2d1e7336-5bc5-4035-8512-dc0f6799a7c4");
+          
+          // Solicita autorização com um redirectUrl configurado (pode ser a própria página)
+          const auth = await xumm.authorize({
+            redirectUrl: window.location.href,
+            returnErrors: true
+          });
+          
+          console.log("Resposta da autorização:", {
+            success: auth?.success,
+            account: auth?.me?.account
+          });
+          
+          if (auth && auth.success && auth.me && auth.me.account) {
+            userToken = auth.token;
+            userAddress = auth.me.account;
+            localStorage.setItem('xummUserToken', userToken);
+            localStorage.setItem('xummWalletAddress', userAddress);
+            connectWalletBtn.textContent = "Carteira Conectada";
+            alert("Carteira conectada! Endereço: " + userAddress);
+            return true;
+          } else {
+            console.error("Falha na conexão:", auth);
+            alert("Falha na conexão. Por favor, aprove a solicitação no XUMM.");
+            return false;
+          }
+        } catch (error) {
+          console.error("Erro ao conectar carteira:", error.message);
+          alert("Erro ao conectar carteira. Veja o console para detalhes.");
+          return false;
+        } finally {
+          connectWalletBtn.classList.remove('disabled');
+          connectWalletBtn.textContent = userAddress ? "Carteira Conectada" : "Connect Wallet";
+        }
       }
       
       // Evento para conectar/desconectar a carteira
       connectWalletBtn.addEventListener("click", async (e) => {
         e.preventDefault();
-        
         if (userToken && userAddress) {
-          // Se já estiver conectado, desconecta
-          disconnectWallet();
+          // Se já conectado, desconecta
+          userToken = null;
+          userAddress = null;
+          localStorage.removeItem('xummUserToken');
+          localStorage.removeItem('xummWalletAddress');
+          connectWalletBtn.textContent = "Connect Wallet";
+          alert("Carteira desconectada!");
         } else {
-          // Se não estiver conectado, conecta
           await connectXummWallet();
         }
       });
@@ -433,7 +416,6 @@ async function connectXummWallet() {
       /* Simulação de inserção de NFTs para testes (remova em produção) */
       let selection1 = null;
       let selection2 = null;
-      
       const nftGrid1 = document.getElementById('nft-grid-1');
       const nftGrid2 = document.getElementById('nft-grid-2');
       const battleButton = document.getElementById('battle-button');
@@ -473,7 +455,7 @@ async function connectXummWallet() {
         });
       }
       
-      // Inserção simulada de NFTs (para testes)
+      // Inserção simulada de NFTs para teste
       simulateNFTInsertion(nftGrid1, "<strong>Charmander</strong>");
       simulateNFTInsertion(nftGrid1, "<strong>Bulbasaur</strong>");
       simulateNFTInsertion(nftGrid1, "<strong>Squirtle</strong>");
@@ -498,7 +480,7 @@ async function connectXummWallet() {
         }
       });
       
-      // Lógica para as caixas colapsáveis (Regras e Ranking)
+      // Lógica para as caixas colapsáveis (Regras e Leaderboard)
       document.querySelectorAll('.collapsible .collapsible-header').forEach(header => {
         header.addEventListener('click', () => {
           const content = header.nextElementSibling;
@@ -516,17 +498,17 @@ async function connectXummWallet() {
       // Alterna da seção Lobby para a seção Game
       document.getElementById("create-room").addEventListener("click", function(e) {
         e.preventDefault();
-        const roomCost = 1.0; // Custo fixo
-        alert("Sala aberta com sucesso! Custo: " + roomCost + " XRP. Aguarde outro treinador ou escolha uma sala disponível.");
+        const roomCost = 1.0; // Custo fixo de 1.0 XRP
+        alert("Lobby opened successfully! Cost: " + roomCost + " XRP. Wait for another trainer or choose an available lobby.");
         document.getElementById("lobby").style.display = "none";
         document.getElementById("game").style.display = "block";
       });
       
-      // Lógica para os botões "Entrar" nos lobbies disponíveis (simulação)
+      // Lógica para os botões "Join" nas lobbies disponíveis (simulação)
       document.querySelectorAll('.lobby-entry .join-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
           e.preventDefault();
-          alert("Você entrou na sala! Custo: 1.0 XRP.");
+          alert("You joined the lobby! Cost: 1.0 XRP.");
           document.getElementById("lobby").style.display = "none";
           document.getElementById("game").style.display = "block";
         });
