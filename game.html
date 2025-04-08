@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>XRPokémon - Lobby & Batalha</title>
-  <!-- Importa a fonte "Press Start 2P" para manter a identidade visual Pokémon -->
+  <!-- Importa a fonte "Press Start 2P" -->
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   <!-- Importa o XUMM SDK -->
   <script src="https://unpkg.com/xumm-sdk/dist/xumm-sdk.min.js"></script>
@@ -16,11 +16,7 @@
       --pokemon-black: #333333;
     }
     /* Reset básico */
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: 'Press Start 2P', cursive;
       background: linear-gradient(135deg, var(--pokemon-yellow), var(--pokemon-blue));
@@ -30,12 +26,11 @@
       position: relative;
       min-height: 100vh;
     }
-    /* Pseudo-elemento para imagem de fundo semi-transparente */
+    /* Verifique se o arquivo 'background.png' está na pasta "assets" (atenção à capitalização) */
     body::before {
       content: "";
       position: absolute;
       inset: 0;
-      /* VERIFIQUE: o arquivo "assets/background.png" deve estar no caminho correto */
       background: url("assets/background.png") no-repeat center center / cover;
       opacity: 0.5;
       z-index: -1;
@@ -59,18 +54,12 @@
       background-color: #ffd62f;
       transform: translateY(-3px);
     }
-    .cta-button.disabled {
-      pointer-events: none;
-      opacity: 0.6;
-    }
-    #connect-wallet {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      z-index: 100;
-    }
+    .cta-button.disabled { pointer-events: none; opacity: 0.6; }
+    #connect-wallet { position: fixed; top: 20px; right: 20px; z-index: 100; }
+    
     .section { display: none; }
     #lobby { display: block; }
+    
     .container {
       max-width: 1000px;
       margin: 40px auto;
@@ -89,7 +78,8 @@
       text-shadow: 3px 3px 0 var(--pokemon-blue);
     }
     p { font-size: 1rem; margin-bottom: 20px; color: #333; }
-    /* Lobby */
+    
+    /* Seção Lobby */
     #lobby .room-form { margin-top: 20px; text-align: center; }
     #lobby .room-form p.cost-info { font-size: 1rem; margin-bottom: 20px; font-weight: bold; }
     .lobbies-box {
@@ -125,7 +115,8 @@
       transition: background-color 0.2s, transform 0.2s;
     }
     .lobby-entry .join-btn:hover { background-color: #ffd62f; transform: translateY(-3px); }
-    /* Game (Batalha) */
+    
+    /* Seção Game */
     #game .battle-container {
       display: flex;
       flex-wrap: wrap;
@@ -195,7 +186,7 @@
       align-self: center;
     }
     
-    /* Caixas colapsáveis para Regras e Ranking */
+    /* Caixas colapsáveis (para Regras e Ranking) */
     .collapsible {
       margin-top: 30px;
       background: rgba(255,255,255,0.8);
@@ -246,7 +237,7 @@
   <!-- Botão para Conectar Carteira -->
   <a href="#" id="connect-wallet" class="cta-button">Connect Wallet</a>
   
-  <!-- Seção Lobby: Exibida inicialmente -->
+  <!-- Seção Lobby (inicialmente visível) -->
   <div id="lobby" class="container section">
     <h1>Abrir Sala de Batalha</h1>
     <p>Abra sua sala para aguardar outro treinador Pokémon.<br>
@@ -273,28 +264,28 @@
     </div>
   </div>
   
-  <!-- Seção Game: Oculta inicialmente -->
+  <!-- Seção Game (oculta inicialmente) -->
   <div id="game" class="container section" style="display: none;">
     <h1>Batalha Online</h1>
     <p>Bem-vindo à sala de batalha! Aguarde outro treinador ou inicie sua batalha.</p>
     
     <div class="battle-container">
-      <!-- Área do Treinador 1 -->
+      <!-- Treinador 1 -->
       <div class="trainer" id="trainer1">
         <h2>Treinador 1</h2>
         <div class="nft-grid" id="nft-grid-1">
-          <!-- NFTs serão carregados dinamicamente -->
+          <!-- Os NFTs serão carregados dinamicamente -->
         </div>
       </div>
       
       <!-- Elemento central "VS" -->
       <div class="vs">VS</div>
       
-      <!-- Área do Treinador 2 -->
+      <!-- Treinador 2 -->
       <div class="trainer" id="trainer2">
         <h2>Treinador 2</h2>
         <div class="nft-grid" id="nft-grid-2">
-          <!-- NFTs serão carregados dinamicamente -->
+          <!-- Os NFTs serão carregados dinamicamente -->
         </div>
       </div>
     </div>
@@ -336,133 +327,134 @@
     </div>
   </div>
   
-  <!-- Coloque seu script aqui, após a importação do SDK e o carregamento completo do DOM -->
+  <!-- Nosso código JavaScript – colocado no final para garantir que tudo já foi carregado -->
   <script>
-    // Inicializa o XUMM SDK com sua API Key e API Secret
-    const xumm = new XummSdk("46c2e7c6-c005-4a6d-bef7-e0b6090bc9bd", "2d1e7336-5bc5-4035-8512-dc0f6799a7c4");
-    
-    // Conexão com Carteira
-    document.getElementById("connect-wallet").addEventListener("click", async (e) => {
-      e.preventDefault();
-      try {
-        const payload = await xumm.payload.create({
-          txjson: { TransactionType: "SignIn" }
-        });
-        console.log("Payload criado:", payload);
-        window.open(payload.next.always, "_blank");
-        const result = await payload.resolved;
-        if (result.signed) {
-          alert("Carteira conectada! Endereço: " + result.account);
-          // Carregue os NFTs do usuário aqui
-        } else {
-          alert("Conexão cancelada.");
-        }
-      } catch (error) {
-        console.error("Erro ao conectar carteira:", error);
-        alert("Erro ao conectar carteira.");
-      }
-    });
-    
-    /* Simulação de inserção de NFTs para teste (remova em produção) */
-    let selection1 = null;
-    let selection2 = null;
-    
-    const nftGrid1 = document.getElementById('nft-grid-1');
-    const nftGrid2 = document.getElementById('nft-grid-2');
-    const battleButton = document.getElementById('battle-button');
-    const battleResult = document.getElementById('battle-result');
-    
-    function simulateNFTInsertion(grid, contentHTML) {
-      const nftElement = document.createElement('div');
-      nftElement.classList.add('nft');
-      nftElement.innerHTML = contentHTML;
-      grid.appendChild(nftElement);
+    document.addEventListener('DOMContentLoaded', function() {
+      // Inicializa o XUMM SDK com sua API Key e Secret
+      const xumm = new XummSdk("46c2e7c6-c005-4a6d-bef7-e0b6090bc9bd", "2d1e7336-5bc5-4035-8512-dc0f6799a7c4");
       
-      nftElement.addEventListener('click', () => {
-        if (grid.id === 'nft-grid-1') {
-          if (selection1 === nftElement) {
-            selection1 = null;
-            nftElement.classList.remove('selected');
+      // Evento para conectar a carteira
+      document.getElementById("connect-wallet").addEventListener("click", async (e) => {
+        e.preventDefault();
+        try {
+          const payload = await xumm.payload.create({
+            txjson: { TransactionType: "SignIn" }
+          });
+          console.log("Payload criado:", payload);
+          window.open(payload.next.always, "_blank");
+          const result = await payload.resolved;
+          if (result.signed) {
+            alert("Carteira conectada! Endereço: " + result.account);
+            // Lógica para carregar os NFTs do usuário deve ser implementada aqui.
           } else {
-            Array.from(nftGrid1.children).forEach(el => el.classList.remove('selected'));
-            selection1 = nftElement;
-            nftElement.classList.add('selected');
+            alert("Conexão cancelada.");
           }
-        } else if (grid.id === 'nft-grid-2') {
-          if (selection2 === nftElement) {
-            selection2 = null;
-            nftElement.classList.remove('selected');
-          } else {
-            Array.from(nftGrid2.children).forEach(el => el.classList.remove('selected'));
-            selection2 = nftElement;
-            nftElement.classList.add('selected');
-          }
+        } catch (error) {
+          console.error("Erro ao conectar carteira:", error);
+          alert("Erro ao conectar carteira.");
         }
-        if (selection1 && selection2) {
-          battleButton.classList.remove('disabled');
-        } else {
+      });
+      
+      /* Simulação de inserção de NFTs para testes (remova em produção) */
+      let selection1 = null;
+      let selection2 = null;
+      
+      const nftGrid1 = document.getElementById('nft-grid-1');
+      const nftGrid2 = document.getElementById('nft-grid-2');
+      const battleButton = document.getElementById('battle-button');
+      const battleResult = document.getElementById('battle-result');
+      
+      function simulateNFTInsertion(grid, contentHTML) {
+        const nftElement = document.createElement('div');
+        nftElement.classList.add('nft');
+        nftElement.innerHTML = contentHTML;
+        grid.appendChild(nftElement);
+        
+        nftElement.addEventListener('click', () => {
+          if (grid.id === 'nft-grid-1') {
+            if (selection1 === nftElement) {
+              selection1 = null;
+              nftElement.classList.remove('selected');
+            } else {
+              Array.from(nftGrid1.children).forEach(el => el.classList.remove('selected'));
+              selection1 = nftElement;
+              nftElement.classList.add('selected');
+            }
+          } else if (grid.id === 'nft-grid-2') {
+            if (selection2 === nftElement) {
+              selection2 = null;
+              nftElement.classList.remove('selected');
+            } else {
+              Array.from(nftGrid2.children).forEach(el => el.classList.remove('selected'));
+              selection2 = nftElement;
+              nftElement.classList.add('selected');
+            }
+          }
+          if (selection1 && selection2) {
+            battleButton.classList.remove('disabled');
+          } else {
+            battleButton.classList.add('disabled');
+          }
+        });
+      }
+      
+      // Inserção simulada de NFTs (para testes)
+      simulateNFTInsertion(nftGrid1, "<strong>Charmander</strong>");
+      simulateNFTInsertion(nftGrid1, "<strong>Bulbasaur</strong>");
+      simulateNFTInsertion(nftGrid1, "<strong>Squirtle</strong>");
+      simulateNFTInsertion(nftGrid2, "<strong>Pikachu</strong>");
+      simulateNFTInsertion(nftGrid2, "<strong>Jigglypuff</strong>");
+      simulateNFTInsertion(nftGrid2, "<strong>Meowth</strong>");
+      
+      function calculateWinner() {
+        return Math.random() < 0.5 ? "Treinador 1" : "Treinador 2";
+      }
+      
+      battleButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (selection1 && selection2 && !battleButton.classList.contains('disabled')) {
+          const winner = calculateWinner();
+          battleResult.innerHTML = `<p>O vencedor é: ${winner}!</p>`;
+          selection1.classList.remove('selected');
+          selection2.classList.remove('selected');
+          selection1 = null;
+          selection2 = null;
           battleButton.classList.add('disabled');
         }
       });
-    }
-    
-    // Simulação de inserção de NFTs para teste (remova em produção)
-    simulateNFTInsertion(nftGrid1, "<strong>Charmander</strong>");
-    simulateNFTInsertion(nftGrid1, "<strong>Bulbasaur</strong>");
-    simulateNFTInsertion(nftGrid1, "<strong>Squirtle</strong>");
-    simulateNFTInsertion(nftGrid2, "<strong>Pikachu</strong>");
-    simulateNFTInsertion(nftGrid2, "<strong>Jigglypuff</strong>");
-    simulateNFTInsertion(nftGrid2, "<strong>Meowth</strong>");
-    
-    // Função de exemplo para calcular o vencedor (simulação)
-    function calculateWinner() {
-      return Math.random() < 0.5 ? "Treinador 1" : "Treinador 2";
-    }
-    
-    battleButton.addEventListener('click', (e) => {
-      e.preventDefault();
-      if (selection1 && selection2 && !battleButton.classList.contains('disabled')) {
-        const winner = calculateWinner();
-        battleResult.innerHTML = `<p>O vencedor é: ${winner}!</p>`;
-        selection1.classList.remove('selected');
-        selection2.classList.remove('selected');
-        selection1 = null;
-        selection2 = null;
-        battleButton.classList.add('disabled');
-      }
-    });
-    
-    // Lógica para tornar as caixas colapsáveis (Regras e Ranking)
-    document.querySelectorAll('.collapsible .collapsible-header').forEach(header => {
-      header.addEventListener('click', () => {
-        const content = header.nextElementSibling;
-        const toggleIcon = header.querySelector('.toggle-icon');
-        if (content.style.display === 'block') {
-          content.style.display = 'none';
-          toggleIcon.textContent = '[+]';
-        } else {
-          content.style.display = 'block';
-          toggleIcon.textContent = '[-]';
-        }
+      
+      // Lógica para as caixas colapsáveis (Regras e Ranking)
+      document.querySelectorAll('.collapsible .collapsible-header').forEach(header => {
+        header.addEventListener('click', () => {
+          const content = header.nextElementSibling;
+          const toggleIcon = header.querySelector('.toggle-icon');
+          if (content.style.display === 'block') {
+            content.style.display = 'none';
+            toggleIcon.textContent = '[+]';
+          } else {
+            content.style.display = 'block';
+            toggleIcon.textContent = '[-]';
+          }
+        });
       });
-    });
-    
-    // Lógica para alternar da seção Lobby para a seção Game
-    document.getElementById("create-room").addEventListener("click", function(e) {
-      e.preventDefault();
-      const roomCost = 1.0; // Custo fixo
-      alert("Sala aberta com sucesso! Custo: " + roomCost + " XRP. Aguarde outro treinador ou escolha uma sala disponível.");
-      document.getElementById("lobby").style.display = "none";
-      document.getElementById("game").style.display = "block";
-    });
-    
-    // Lógica para os botões "Entrar" nos lobbies disponíveis (simulação)
-    document.querySelectorAll('.lobby-entry .join-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
+      
+      // Alterna da seção Lobby para a seção Game
+      document.getElementById("create-room").addEventListener("click", function(e) {
         e.preventDefault();
-        alert("Você entrou na sala! Custo: 1.0 XRP.");
+        const roomCost = 1.0; // Custo fixo
+        alert("Sala aberta com sucesso! Custo: " + roomCost + " XRP. Aguarde outro treinador ou escolha uma sala disponível.");
         document.getElementById("lobby").style.display = "none";
         document.getElementById("game").style.display = "block";
+      });
+      
+      // Lógica para os botões "Entrar" nos lobbies disponíveis (simulação)
+      document.querySelectorAll('.lobby-entry .join-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          alert("Você entrou na sala! Custo: 1.0 XRP.");
+          document.getElementById("lobby").style.display = "none";
+          document.getElementById("game").style.display = "block";
+        });
       });
     });
   </script>
