@@ -350,24 +350,31 @@
       // Função para conectar a carteira XUMM
 async function connectXummWallet() {
   try {
+    // Limpar qualquer token antigo que possa estar causando problemas
+    localStorage.removeItem('xummUserToken');
+    localStorage.removeItem('xummWalletAddress');
+    
     // Desabilitar o botão enquanto processamos
     connectWalletBtn.classList.add('disabled');
     connectWalletBtn.textContent = "Conectando...";
     
-    // Criar um objeto de payload XUMM SDK com mais detalhes
+    // Criar um objeto de payload XUMM SDK com parâmetros específicos
     const xumm = new Xumm('46c2e7c6-c005-4a6d-bef7-e0b6090bc9bd');
     
     console.log("Iniciando solicitação de autorização XUMM...");
     
-    // Criar uma solicitação de sign-in com timeout maior
+    // Imprimir a URL atual para verificar se o redirecionamento está correto
+    console.log("URL atual:", window.location.href);
+    
+    // Criar uma solicitação de sign-in com configurações explícitas
     const request = await xumm.authorize({
-      redirectUrl: window.location.href,
-      pushDisabled: false  // Permitir notificações push para usuários XUMM
+      redirectUrl: window.location.origin + window.location.pathname,
+      pushDisabled: false
     });
     
-    console.log("Resposta da solicitação:", request);
+    // Log da resposta completa para depuração
+    console.log("Resposta completa da solicitação:", JSON.stringify(request, null, 2));
     
-    // Tratamento mais detalhado da resposta
     if (request && request.success) {
       console.log("Carteira conectada com sucesso!");
       
@@ -382,21 +389,23 @@ async function connectXummWallet() {
       // Atualizar a interface do usuário
       connectWalletBtn.textContent = "Carteira Conectada";
       alert("Carteira conectada! Endereço: " + userAddress);
-      
-      // Aqui você poderia chamar uma função para carregar os NFTs do usuário
-      // loadUserNFTs(userAddress);
     } else {
-      // Exibir detalhes sobre a falha
-      console.error("Falha na conexão:", request);
-      let errorMessage = "Conexão cancelada.";
-      if (request && request.reason) {
-        errorMessage += " Motivo: " + request.reason;
+      // Exibir detalhes mais específicos sobre a falha
+      console.error("Falha na conexão. Detalhes:", request);
+      
+      // Extrair mensagens específicas de erro, se disponíveis
+      let errorMessage = "Conexão cancelada ou falhou.";
+      if (request) {
+        if (request.reason) errorMessage += " Motivo: " + request.reason;
+        if (request.error) errorMessage += " Erro: " + request.error;
+        if (request.message) errorMessage += " Mensagem: " + request.message;
       }
+      
       alert(errorMessage);
     }
   } catch (error) {
-    // Log detalhado de erros
-    console.error("Erro detalhado:", error);
+    console.error("Erro ao conectar carteira:", error);
+    console.error("Stack trace:", error.stack);
     alert("Erro ao conectar carteira: " + (error.message || "Erro desconhecido"));
   } finally {
     connectWalletBtn.classList.remove('disabled');
