@@ -363,7 +363,10 @@
           connectWalletBtn.textContent = "Conectando...";
           
           // Criar um objeto de payload XUMM SDK
-          const xumm = new Xumm('46c2e7c6-c005-4a6d-bef7-e0b6090bc9bd');
+const xumm = new Xumm('46c2e7c6-c005-4a6d-bef7-e0b6090bc9bd', {
+  implicit: true,
+  redirectUrl: window.location.href // Usa a URL atual como redirecionamento
+});
           
           // Criar uma solicitação de sign-in
           const request = await xumm.authorize();
