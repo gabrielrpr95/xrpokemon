@@ -352,48 +352,45 @@
       checkExistingConnection();
       
       // Função para conectar a carteira via XUMM usando authorize()
-      async function connectXummWallet() {
-        try {
-          connectWalletBtn.classList.add('disabled');
-          connectWalletBtn.textContent = "Conectando...";
-          console.log("Iniciando solicitação de autorização XUMM...");
-          
-          // Cria uma nova instância do XUMM SDK com API Key e Secret
-          const xumm = new XummSdk("46c2e7c6-c005-4a6d-bef7-e0b6090bc9bd", "2d1e7336-5bc5-4035-8512-dc0f6799a7c4");
-          
-          // Solicita autorização com um redirectUrl configurado (usa a URL atual)
-          const auth = await xumm.authorize({
-            redirectUrl: window.location.origin + window.location.pathname,
-            returnErrors: true
-          });
-          
-          console.log("Resposta da autorização:", {
-            success: auth?.success,
-            account: auth?.me?.account
-          });
-          
-          if (auth && auth.success && auth.me && auth.me.account) {
-            userToken = auth.token;
-            userAddress = auth.me.account;
-            localStorage.setItem('xummUserToken', userToken);
-            localStorage.setItem('xummWalletAddress', userAddress);
-            connectWalletBtn.textContent = "Carteira Conectada";
-            alert("Carteira conectada! Endereço: " + userAddress);
-            return true;
-          } else {
-            console.error("Falha na conexão:", auth);
-            alert("Falha na conexão. Por favor, aprove a solicitação no XUMM.");
-            return false;
-          }
-        } catch (error) {
-          console.error("Erro ao conectar carteira:", error.message);
-          alert("Erro ao conectar carteira. Veja o console para detalhes.");
-          return false;
-        } finally {
-          connectWalletBtn.classList.remove('disabled');
-          connectWalletBtn.textContent = userAddress ? "Carteira Conectada" : "Connect Wallet";
-        }
-      }
+     async function connectXummWallet() {
+  try {
+    connectWalletBtn.classList.add('disabled');
+    connectWalletBtn.textContent = "Conectando...";
+    console.log("Iniciando solicitação de autorização XUMM...");
+    
+    // Use Xumm (com X maiúsculo) e apenas a API key
+    const xumm = new Xumm("46c2e7c6-c005-4a6d-bef7-e0b6090bc9bd");
+    
+    // Solicita autorização com um redirectUrl configurado
+    const auth = await xumm.authorize();
+    
+    console.log("Resposta da autorização:", {
+      success: auth?.success,
+      account: auth?.me?.account
+    });
+    
+    if (auth && auth.success && auth.me && auth.me.account) {
+      userToken = auth.token;
+      userAddress = auth.me.account;
+      localStorage.setItem('xummUserToken', userToken);
+      localStorage.setItem('xummWalletAddress', userAddress);
+      connectWalletBtn.textContent = "Carteira Conectada";
+      alert("Carteira conectada! Endereço: " + userAddress);
+      return true;
+    } else {
+      console.error("Falha na conexão:", auth);
+      alert("Falha na conexão. Por favor, aprove a solicitação no XUMM.");
+      return false;
+    }
+  } catch (error) {
+    console.error("Erro ao conectar carteira:", error.message);
+    alert("Erro ao conectar carteira. Veja o console para detalhes.");
+    return false;
+  } finally {
+    connectWalletBtn.classList.remove('disabled');
+    connectWalletBtn.textContent = userAddress ? "Carteira Conectada" : "Connect Wallet";
+  }
+}
       
       // Evento para conectar/desconectar a carteira
       connectWalletBtn.addEventListener("click", async (e) => {
