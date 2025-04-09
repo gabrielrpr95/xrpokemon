@@ -248,6 +248,13 @@
     <!-- Caixa listando as lobbies disponíveis -->
     <div class="lobbies-box">
       <h2>Available Lobbies</h2>
+      <div id="nft-selector" style="margin-top: 40px;">
+  <h2 style="color: var(--pokemon-red); text-shadow: 2px 2px 0 var(--pokemon-blue); font-size: 1.8rem;">Your XRPokémon NFTs</h2>
+  <div id="user-nft-grid" class="nft-grid" style="flex-direction: row; flex-wrap: wrap; justify-content: center;">
+    <!-- NFTs serão carregados aqui -->
+  </div>
+</div>
+
       <div class="lobby-entry">
         <span>Lobby 1 - 1.0 XRP</span>
         <a href="#" class="cta-button join-btn">Go!</a>
@@ -376,6 +383,9 @@
       localStorage.setItem('xummWalletAddress', userAddress);
       connectWalletBtn.textContent = "Carteira Conectada";
       alert("Carteira conectada! Endereço: " + userAddress);
+  
+      loadUserNFTs();
+
       return true;
     } else {
       // Log mais detalhado sobre o que está faltando
@@ -507,7 +517,39 @@
         document.getElementById("lobby").style.display = "none";
         document.getElementById("game").style.display = "block";
       });
-      
+
+       async function loadUserNFTs() {
+        if (!userAddress) return;
+
+        const url = `https://xls20-api.xrpldata.com/account/${userAddress}/nfts`;
+
+        try {
+          const response = await fetch(url);
+          const data = await response.json();
+
+          // Altere o issuer abaixo para o da sua coleção!
+          const filtered = data.nfts.filter(nft => nft.issuer === 'rPDGG5b2kWQPGSPZCULfUp26t39MrbLxzq');
+
+          const grid = document.getElementById('user-nft-grid');
+          grid.innerHTML = ''; // Limpa antes
+
+          if (filtered.length === 0) {
+            grid.innerHTML = '<p>Você não possui nenhum XRPokémon NFT ainda.</p>';
+            return;
+          }
+
+          filtered.forEach(nft => {
+            const nftEl = document.createElement('div');
+            nftEl.classList.add('nft');
+            nftEl.innerHTML = `<img src="${nft.url}" alt="XRPokémon" style="max-height: 100px;"><br><strong>${nft.name || 'XRPokémon'}</strong>`;
+            grid.appendChild(nftEl);
+          });
+        } catch (err) {
+          console.error("Erro ao buscar NFTs:", err);
+          document.getElementById('user-nft-grid').innerHTML = '<p>Erro ao carregar NFTs.</p>';
+        }
+      }
+    });
       // Lógica para os botões "Join" nos lobbies disponíveis (simulação)
       document.querySelectorAll('.lobby-entry .join-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
