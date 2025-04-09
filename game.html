@@ -4,49 +4,311 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>XRPokémon - Lobby</title>
+  <!-- Importa a fonte "Press Start 2P" -->
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <!-- Importa o XUMM SDK -->
   <script src="https://xumm.app/assets/cdn/xumm.min.js"></script>
   <style>
-    /* ... (mantive seu CSS completo sem alteração) ... */
+    :root {
+      --pokemon-red: #ee1515;
+      --pokemon-blue: #3b5ba7;
+      --pokemon-yellow: #ffcb05;
+      --pokemon-black: #333333;
+    }
+    /* Reset básico */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Press Start 2P', cursive;
+      background: linear-gradient(135deg, var(--pokemon-yellow), var(--pokemon-blue));
+      background-size: cover;
+      color: #333;
+      padding: 20px;
+      position: relative;
+      min-height: 100vh;
+    }
+    /* Verifique se 'assets/background.png' está no caminho correto e com a capitalização correta */
+    body::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: url("assets/background.png") no-repeat center center / cover;
+      opacity: 0.5;
+      z-index: -1;
+    }
+    .cta-button {
+      display: inline-block;
+      background-color: #ffcb05;
+      color: #000;
+      border: 3px solid #000;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 1rem;
+      text-decoration: none;
+      text-transform: uppercase;
+      padding: 12px 24px;
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.2s;
+      border-radius: 4px;
+      text-align: center;
+    }
+    .cta-button:hover {
+      background-color: #ffd62f;
+      transform: translateY(-3px);
+    }
+    .cta-button.disabled { pointer-events: none; opacity: 0.6; }
+    #connect-wallet { position: fixed; top: 20px; right: 20px; z-index: 100; }
+    
+    .section { display: none; }
+    #lobby { display: block; }
+    
+    .container {
+      max-width: 1000px;
+      margin: 40px auto;
+      background: linear-gradient(135deg, rgba(255,255,255,0.5), rgba(249,249,249,0.5));
+      border-radius: 20px;
+      padding: 30px;
+      text-align: center;
+      box-shadow: 0 0 30px rgba(0,0,0,0.4);
+      border: 8px double var(--pokemon-red);
+      border-image: linear-gradient(135deg, var(--pokemon-red) 0%, var(--pokemon-yellow) 40%, var(--pokemon-blue) 100%) 1;
+    }
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+      color: var(--pokemon-red);
+      text-shadow: 3px 3px 0 var(--pokemon-blue);
+    }
+    p { font-size: 1rem; margin-bottom: 20px; color: #333; }
+    
+    /* Seção Lobby */
+    #lobby .room-form { margin-top: 20px; text-align: center; }
+    #lobby .room-form p.cost-info { font-size: 1rem; margin-bottom: 20px; font-weight: bold; }
+    .lobbies-box {
+      margin-top: 30px;
+      background: rgba(255,255,255,0.8);
+      border: 3px solid var(--pokemon-blue);
+      border-radius: 10px;
+      padding: 20px;
+      text-align: left;
+      font-family: 'Press Start 2P', cursive;
+      color: #333;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    }
+    .lobbies-box h2 { margin-bottom: 15px; font-size: 1.8rem; color: var(--pokemon-blue); text-shadow: 2px 2px 0 var(--pokemon-yellow); }
+    .lobby-entry {
+      padding: 10px;
+      border-bottom: 1px solid #aaa;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.9rem;
+    }
+    .lobby-entry:last-child { border-bottom: none; }
+    .lobby-entry .join-btn {
+      font-size: 0.9rem;
+      padding: 6px 12px;
+      background-color: #ffcb05;
+      color: #000;
+      border: 3px solid #000;
+      border-radius: 4px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.2s;
+    }
+    .lobby-entry .join-btn:hover { background-color: #ffd62f; transform: translateY(-3px); }
+    
+    /* Seção Game */
+    #game .battle-container {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      justify-content: space-around;
+      margin: 30px 0;
+      gap: 20px;
+      position: relative;
+    }
+    #game .trainer {
+      width: 40%;
+      background: linear-gradient(135deg, rgba(249,249,249,0.5), rgba(255,255,255,0.5));
+      border: 4px double var(--pokemon-red);
+      border-image: linear-gradient(135deg, var(--pokemon-red), var(--pokemon-yellow), var(--pokemon-blue)) 1;
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.4);
+      position: relative;
+    }
+    #game .trainer h2 {
+      font-size: 1.8rem;
+      margin-bottom: 15px;
+      color: var(--pokemon-red);
+      text-shadow: 2px 2px 0 var(--pokemon-blue);
+    }
+    #game .nft-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 10px;
+      max-height: 300px;
+      overflow-y: auto;
+      padding-right: 5px;
+      border-top: 1px dashed #aaa;
+      margin-top: 15px;
+      padding-top: 10px;
+    }
+    #game .nft {
+      position: relative;
+      width: 100%;
+      min-height: 120px;
+      border: 4px solid;
+      border-image: linear-gradient(45deg, var(--pokemon-yellow), var(--pokemon-red), var(--pokemon-blue)) 1;
+      border-radius: 15px;
+      background: rgba(255,255,255,0.8);
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    #game .nft:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 15px rgba(255,203,5,0.8);
+    }
+    #game .nft.selected {
+      border-image: linear-gradient(45deg, var(--pokemon-yellow), var(--pokemon-yellow), var(--pokemon-yellow)) 1;
+      box-shadow: 0 0 20px var(--pokemon-yellow);
+    }
+    #game .vs {
+      font-size: 4rem;
+      font-family: 'Press Start 2P', cursive;
+      color: var(--pokemon-red);
+      text-shadow: 3px 3px 0 #fff;
+      align-self: center;
+    }
+    
+    /* Caixas colapsáveis (Regras e Leaderboard) */
+    .collapsible {
+      margin-top: 30px;
+      background: rgba(255,255,255,0.8);
+      border: 3px solid;
+      border-radius: 10px;
+      padding: 10px;
+      text-align: left;
+      font-family: 'Press Start 2P', cursive;
+      color: #333;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    }
+    .collapsible .box-content { display: none; }
+    .collapsible .collapsible-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+      margin-bottom: 10px;
+    }
+    .collapsible .collapsible-header h2 { font-size: 1.8rem; margin: 0; }
+    .collapsible .collapsible-header span.toggle-icon { font-weight: bold; font-size: 1.2rem; }
+    
+    .rules-box { border-color: var(--pokemon-red); }
+    .rules-box h2 { color: var(--pokemon-red); text-shadow: 2px 2px 0 var(--pokemon-blue); }
+    .rules-box p { font-size: 0.9rem; margin-bottom: 10px; }
+    
+    .ranking-box { border-color: var(--pokemon-blue); }
+    .ranking-box h2 { color: var(--pokemon-blue); text-shadow: 2px 2px 0 var(--pokemon-yellow); }
+    .ranking-box p { font-size: 0.9rem; margin-bottom: 10px; }
+    
+    .vs {
+      font-size: 4rem;
+      font-family: 'Press Start 2P', cursive;
+      color: var(--pokemon-red);
+      text-shadow: 3px 3px 0 #fff;
+      align-self: center;
+    }
+    
+    @media (max-width: 768px) {
+      .trainer { width: 90%; }
+      .vs { font-size: 3rem; }
+    }
   </style>
 </head>
 <body>
+  <!-- Botão para Conectar Carteira -->
   <a href="#" id="connect-wallet" class="cta-button">Connect Wallet</a>
-
+  
+  <!-- Seção Lobby (inicialmente visível) -->
   <div id="lobby" class="container section">
-    <h1>XRPokemon - Battle Arena (BETA 1.0)</h1>
+    <h1>XRPokemon - Battle Arena (BETA)</h1>
     <p>Open your room to wait for another XRPokemon Trainer.<br>
-       The fixed cost to open or join the room is <strong>1.0 XRP</strong>.</p>
-    <div class="room-form">
+       The fixed cost to open or join the room is <strong>1.0 XRP</strong>.
+    </p>
+    <div class="room-form" style="text-align: center;">
       <a href="#" id="create-room" class="cta-button">Open lobby</a>
     </div>
-
-    <div class="lobbies-box">
-      <h2>Available Lobbies</h2>
-      <div class="lobby-entry"><span>Lobby 1 - 1.0 XRP</span><a href="#" class="cta-button join-btn">Go!</a></div>
-      <div class="lobby-entry"><span>Lobby 2 - 1.0 XRP</span><a href="#" class="cta-button join-btn">Go!</a></div>
-      <div class="lobby-entry"><span>Lobby 3 - 1.0 XRP</span><a href="#" class="cta-button join-btn">Go!</a></div>
-    </div>
-
+    
     <div id="nft-selector" style="margin-top: 40px;">
       <h2 style="color: var(--pokemon-red); text-shadow: 2px 2px 0 var(--pokemon-blue); font-size: 1.8rem;">Your XRPokémon NFTs</h2>
-      <div id="user-nft-grid" class="nft-grid" style="flex-direction: row; flex-wrap: wrap; justify-content: center;"></div>
+      <div id="user-nft-grid" class="nft-grid" style="flex-direction: row; flex-wrap: wrap; justify-content: center;">
+        <!-- NFTs serão carregados aqui -->
+      </div>
+    </div>
+    
+    <!-- Caixa listando as lobbies disponíveis -->
+    <div class="lobbies-box">
+      <h2>Available Lobbies</h2>
+      <div class="lobby-entry">
+        <span>Lobby 1 - 1.0 XRP</span>
+        <a href="#" class="cta-button join-btn">Go!</a>
+      </div>
+      <div class="lobby-entry">
+        <span>Lobby 2 - 1.0 XRP</span>
+        <a href="#" class="cta-button join-btn">Go!</a>
+      </div>
+      <div class="lobby-entry">
+        <span>Lobby 3 - 1.0 XRP</span>
+        <a href="#" class="cta-button join-btn">Go!</a>
+      </div>
     </div>
   </div>
-
+  
+  <!-- Seção Game (oculta inicialmente) -->
   <div id="game" class="container section" style="display: none;">
     <h1>XRPokemon Battlearena</h1>
     <p>Welcome to the battle room! Wait for another trainer or start your battle!</p>
+    
     <div class="battle-container">
-      <div class="trainer" id="trainer1"><h2>Trainer 1</h2><div class="nft-grid" id="nft-grid-1"></div></div>
+      <!-- Trainer 1 -->
+      <div class="trainer" id="trainer1">
+        <h2>Trainer 1</h2>
+        <div class="nft-grid" id="nft-grid-1">
+          <!-- NFTs will be dynamically loaded -->
+        </div>
+      </div>
+      
+      <!-- Central "VS" element -->
       <div class="vs">VS</div>
-      <div class="trainer" id="trainer2"><h2>Trainer 2</h2><div class="nft-grid" id="nft-grid-2"></div></div>
+      
+      <!-- Trainer 2 -->
+      <div class="trainer" id="trainer2">
+        <h2>Trainer 2</h2>
+        <div class="nft-grid" id="nft-grid-2">
+          <!-- NFTs will be dynamically loaded -->
+        </div>
+      </div>
     </div>
-    <div style="margin-top: 30px;"><a href="#" id="battle-button" class="cta-button disabled">Battle!</a></div>
+    
+    <div style="margin-top: 30px;">
+      <a href="#" id="battle-button" class="cta-button disabled">Battle!</a>
+    </div>
+    
     <div id="battle-result"></div>
-
+    
+    <!-- Collapsible box for Game Rules -->
     <div class="rules-box collapsible">
-      <div class="collapsible-header"><h2>Game Rules</h2><span class="toggle-icon">[+]</span></div>
+      <div class="collapsible-header">
+        <h2>Game Rules</h2>
+        <span class="toggle-icon">[+]</span>
+      </div>
       <div class="box-content">
         <p>1. Each trainer may use only one NFT per battle.</p>
         <p>2. NFTs must be obtained by connecting your XRP wallet.</p>
@@ -55,9 +317,13 @@
         <p>5. This game is for entertainment; rules may be updated.</p>
       </div>
     </div>
-
+    
+    <!-- Collapsible box for Leaderboard -->
     <div class="ranking-box collapsible">
-      <div class="collapsible-header"><h2>Leaderboard</h2><span class="toggle-icon">[+]</span></div>
+      <div class="collapsible-header">
+        <h2>Leaderboard</h2>
+        <span class="toggle-icon">[+]</span>
+      </div>
       <div class="box-content">
         <p>• Each NFT has attributes (attack, defense, HP) that determine its score.</p>
         <p>• Total score is calculated by multiplying the sum of attributes by the NFT's rarity.</p>
@@ -67,13 +333,18 @@
       </div>
     </div>
   </div>
-
+  
+  <!-- Nosso código JavaScript -->
   <script>
     document.addEventListener('DOMContentLoaded', function() {
+      // Variáveis para armazenar as informações da carteira conectada
       let userToken = null;
       let userAddress = null;
+      
+      // Botão para conectar a carteira
       const connectWalletBtn = document.getElementById("connect-wallet");
-
+      
+      // Função para verificar conexão armazenada
       function checkExistingConnection() {
         const savedToken = localStorage.getItem('xummUserToken');
         const savedAddress = localStorage.getItem('xummWalletAddress');
@@ -81,18 +352,37 @@
           userToken = savedToken;
           userAddress = savedAddress;
           connectWalletBtn.textContent = "Carteira Conectada";
+          console.log("Carteira já conectada: " + savedAddress);
+          
+          // Carregar NFTs se já estiver conectado
           loadUserNFTs();
+          
           return true;
         }
         return false;
       }
-
+      
+      // Verifica conexão ao carregar a página
+      checkExistingConnection();
+      
+      // Função para conectar a carteira via XUMM usando authorize()
       async function connectXummWallet() {
         try {
           connectWalletBtn.classList.add('disabled');
           connectWalletBtn.textContent = "Conectando...";
+          console.log("Iniciando solicitação de autorização XUMM...");
+          
+          // Use Xumm (com X maiúsculo) e apenas a API key
           const xumm = new Xumm("46c2e7c6-c005-4a6d-bef7-e0b6090bc9bd");
+          
+          // Solicita autorização e espera que o usuário aprove no app XUMM
+          console.log("Aguardando aprovação no app XUMM...");
           const auth = await xumm.authorize();
+          
+          // Examina a estrutura completa da resposta
+          console.log("Resposta completa da autorização:", auth);
+          
+          // Nova verificação que não depende de auth.success
           if (auth && auth.me && auth.me.account) {
             userToken = auth.token || "";
             userAddress = auth.me.account;
@@ -100,22 +390,38 @@
             localStorage.setItem('xummWalletAddress', userAddress);
             connectWalletBtn.textContent = "Carteira Conectada";
             alert("Carteira conectada! Endereço: " + userAddress);
+        
             loadUserNFTs();
+            return true;
           } else {
-            alert("Falha na conexão. Tente novamente.");
+            // Log mais detalhado sobre o que está faltando
+            const issues = [];
+            if (!auth) issues.push("Resposta nula");
+            else {
+              if (!auth.me) issues.push("Objeto 'me' ausente");
+              else if (!auth.me.account) issues.push("Conta não encontrada");
+            }
+            
+            console.error("Falha na conexão. Problemas detectados:", issues);
+            alert("Falha na conexão da carteira. Por favor, certifique-se de aprovar a solicitação no aplicativo XUMM.");
+            return false;
           }
         } catch (error) {
-          console.error(error);
-          alert("Erro ao conectar: " + error.message);
+          console.error("Erro ao conectar carteira:", error.message);
+          console.error("Stack trace:", error.stack);
+          alert("Erro ao conectar carteira: " + error.message);
+          return false;
         } finally {
           connectWalletBtn.classList.remove('disabled');
           connectWalletBtn.textContent = userAddress ? "Carteira Conectada" : "Connect Wallet";
         }
       }
-
+      
+      // Evento para conectar/desconectar a carteira
       connectWalletBtn.addEventListener("click", async (e) => {
         e.preventDefault();
         if (userToken && userAddress) {
+          // Desconectar
           userToken = null;
           userAddress = null;
           localStorage.removeItem('xummUserToken');
@@ -126,42 +432,168 @@
           await connectXummWallet();
         }
       });
-
+      
+      // Função para carregar NFTs do usuário
       async function loadUserNFTs() {
-        const grid = document.getElementById('user-nft-grid');
-        grid.innerHTML = '<p>Carregando seus XRPokémon NFTs...</p>';
+  if (!userAddress) return;
 
-        const ownedNFTs = ['Abra', 'Charmander', 'Bulbasaur']; // substituir futuramente por dados reais da carteira
-        const baseUrl = "https://lavender-labour-puma-109.mypinata.cloud/ipfs/bafybeiefv6fvsxz4o5xenr3kpqoi2zcig4bg6c2h6sgrqtcml43zagwufa";
+  // URL da API para buscar os NFTs do usuário no XRPL
+  const url = `https://xrp-asset-api.vercel.app/account/${userAddress}`;
 
-        const loaded = [];
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
 
-        for (const name of ownedNFTs) {
-          try {
-            const res = await fetch(`${baseUrl}/${name}.json`);
-            const metadata = await res.json();
+    // Filtramos os NFTs pela coleção (issuer)
+    const filtered = data?.nfts?.filter(
+      nft => nft.issuer === 'rPDGG5b2kWQPGSPZCULfUp26t39MrbLxzq'
+    ) || [];
 
-            const card = document.createElement('div');
-            card.classList.add('nft');
-            card.innerHTML = `
-              <img src="${metadata.image}" alt="${metadata.name}" style="max-height:100px;"><br>
-              <strong>${metadata.name}</strong><br>
-              <small>Raridade: ${metadata.rarity}</small>
-            `;
+    const grid = document.getElementById('user-nft-grid');
+    grid.innerHTML = ''; // Limpa o container antes de inserir os itens
 
-            grid.appendChild(card);
-            loaded.push(card);
-          } catch (err) {
-            console.warn(`Erro ao carregar metadata de ${name}:`, err);
+    if (filtered.length === 0) {
+      grid.innerHTML = '<p>Você não possui nenhum XRPokémon NFT ainda.</p>';
+      return;
+    }
+
+    // Defina a URL base onde os metadatas foram upar no IPFS
+    const baseIpfsUrl = "https://lavender-labour-puma-109.mypinata.cloud/ipfs/bafybeiefv6fvsxz4o5xenr3kpqoi2zcig4bg6c2h6sgrqtcml43zagwufa/";
+
+    // Para cada NFT filtrado, buscamos seu metadata na pasta do IPFS
+    filtered.forEach(nft => {
+      // Aqui estamos assumindo que os arquivos de metadata
+      // têm o nome do NFT, por exemplo, com base na propriedade token_id.
+      // Caso os nomes sejam diferentes, substitua essa lógica de concatenação.
+      const metadataUrl = baseIpfsUrl + nft.token_id + ".json";
+
+      fetch(metadataUrl)
+        .then(response => response.json())
+        .then(metadata => {
+          // Exibe a imagem e o nome conforme os dados retornados do metadata.
+          const nftEl = document.createElement('div');
+          nftEl.classList.add('nft');
+          nftEl.innerHTML = `
+            <img src="${metadata.image}" alt="${metadata.name}" style="max-height: 100px;"><br>
+            <strong>${metadata.name}</strong>
+          `;
+          grid.appendChild(nftEl);
+        })
+        .catch(err => {
+          console.error("Erro ao carregar metadata para o NFT com token_id " + nft.token_id, err);
+          // Em caso de erro, exibe um placeholder ou mensagem
+          const nftEl = document.createElement('div');
+          nftEl.classList.add('nft');
+          nftEl.innerHTML = `<p>Erro ao carregar NFT ${nft.token_id}</p>`;
+          grid.appendChild(nftEl);
+        });
+    });
+  } catch (err) {
+    console.error("Erro ao buscar NFTs:", err);
+    document.getElementById('user-nft-grid').innerHTML = '<p>Erro ao carregar NFTs.</p>';
+  }
+}
+      
+      /* Simulação de inserção de NFTs para testes (remova em produção) */
+      let selection1 = null;
+      let selection2 = null;
+      const nftGrid1 = document.getElementById('nft-grid-1');
+      const nftGrid2 = document.getElementById('nft-grid-2');
+      const battleButton = document.getElementById('battle-button');
+      const battleResult = document.getElementById('battle-result');
+      
+      function simulateNFTInsertion(grid, contentHTML) {
+        const nftElement = document.createElement('div');
+        nftElement.classList.add('nft');
+        nftElement.innerHTML = contentHTML;
+        grid.appendChild(nftElement);
+        
+        nftElement.addEventListener('click', () => {
+          if (grid.id === 'nft-grid-1') {
+            if (selection1 === nftElement) {
+              selection1 = null;
+              nftElement.classList.remove('selected');
+            } else {
+              Array.from(nftGrid1.children).forEach(el => el.classList.remove('selected'));
+              selection1 = nftElement;
+              nftElement.classList.add('selected');
+            }
+          } else if (grid.id === 'nft-grid-2') {
+            if (selection2 === nftElement) {
+              selection2 = null;
+              nftElement.classList.remove('selected');
+            } else {
+              Array.from(nftGrid2.children).forEach(el => el.classList.remove('selected'));
+              selection2 = nftElement;
+              nftElement.classList.add('selected');
+            }
           }
-        }
-
-        if (loaded.length === 0) {
-          grid.innerHTML = '<p>Nenhum NFT encontrado.</p>';
-        }
+          if (selection1 && selection2) {
+            battleButton.classList.remove('disabled');
+          } else {
+            battleButton.classList.add('disabled');
+          }
+        });
       }
-
-      checkExistingConnection();
+      
+      // Inserção simulada de NFTs para teste
+      simulateNFTInsertion(nftGrid1, "<strong>Charmander</strong>");
+      simulateNFTInsertion(nftGrid1, "<strong>Bulbasaur</strong>");
+      simulateNFTInsertion(nftGrid1, "<strong>Squirtle</strong>");
+      simulateNFTInsertion(nftGrid2, "<strong>Pikachu</strong>");
+      simulateNFTInsertion(nftGrid2, "<strong>Jigglypuff</strong>");
+      simulateNFTInsertion(nftGrid2, "<strong>Meowth</strong>");
+      
+      function calculateWinner() {
+        return Math.random() < 0.5 ? "Treinador 1" : "Treinador 2";
+      }
+      
+      battleButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (selection1 && selection2 && !battleButton.classList.contains('disabled')) {
+          const winner = calculateWinner();
+          battleResult.innerHTML = `<p>O vencedor é: ${winner}!</p>`;
+          selection1.classList.remove('selected');
+          selection2.classList.remove('selected');
+          selection1 = null;
+          selection2 = null;
+          battleButton.classList.add('disabled');
+        }
+      });
+      
+      // Lógica para as caixas colapsáveis (Regras e Leaderboard)
+      document.querySelectorAll('.collapsible .collapsible-header').forEach(header => {
+        header.addEventListener('click', () => {
+          const content = header.nextElementSibling;
+          const toggleIcon = header.querySelector('.toggle-icon');
+          if (content.style.display === 'block') {
+            content.style.display = 'none';
+            toggleIcon.textContent = '[+]';
+          } else {
+            content.style.display = 'block';
+            toggleIcon.textContent = '[-]';
+          }
+        });
+      });
+      
+      // Alterna da seção Lobby para a seção Game (para abrir a sala)
+      document.getElementById("create-room").addEventListener("click", function(e) {
+        e.preventDefault();
+        const roomCost = 1.0; // Custo fixo de 1.0 XRP
+        alert("Lobby opened successfully! Cost: " + roomCost + " XRP. Wait for another trainer or choose an available lobby.");
+        document.getElementById("lobby").style.display = "none";
+        document.getElementById("game").style.display = "block";
+      });
+      
+      // Lógica para os botões "Join" nos lobbies disponíveis (simulação)
+      document.querySelectorAll('.lobby-entry .join-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          alert("You joined the lobby! Cost: 1.0 XRP.");
+          document.getElementById("lobby").style.display = "none";
+          document.getElementById("game").style.display = "block";
+        });
+      });
     });
   </script>
 </body>
