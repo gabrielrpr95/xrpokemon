@@ -6,8 +6,14 @@
   <title>XRPokémon - Lobby</title>
   <!-- Importa a fonte "Press Start 2P" -->
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-  <!-- Importa o XUMM SDK -->
+  <!-- Importa o XUMM SDK - Versão mais recente -->
   <script src="https://xumm.app/assets/cdn/xumm.min.js"></script>
+  <!-- Adiciona CORS Anywhere para desenvolvimento (remover em produção) -->
+  <script>
+    // Para fins de desenvolvimento apenas
+    // Em produção, você deve configurar seu próprio proxy no servidor
+    window.corsProxyUrl = 'https://cors-anywhere.herokuapp.com/';
+  </script>
   <style>
     :root {
       --pokemon-red: #ee1515;
@@ -238,7 +244,7 @@
   
   <!-- Seção Lobby (inicialmente visível) -->
   <div id="lobby" class="container section">
-    <h1>XRPokemon - Battle Arena (BETA)</h1>
+    <h1>XRPokemon - Battle Arena (BETA 1.0)</h1>
     <p>Open your room to wait for another XRPokemon Trainer.<br>
        The fixed cost to open or join the room is <strong>1.0 XRP</strong>.
     </p>
@@ -375,9 +381,15 @@
           // Use Xumm (com X maiúsculo) e apenas a API key
           const xumm = new Xumm("46c2e7c6-c005-4a6d-bef7-e0b6090bc9bd");
           
+          // Configurar opções adicionais para solucionar possíveis problemas
+          const xummOptions = {
+            redirectUrl: window.location.href, // Redireciona de volta para a página atual
+            rememberMe: true, // Permitir que o XUMM lembre da sessão
+          };
+          
           // Solicita autorização e espera que o usuário aprove no app XUMM
           console.log("Aguardando aprovação no app XUMM...");
-          const auth = await xumm.authorize();
+          const auth = await xumm.authorize(xummOptions);
           
           // Examina a estrutura completa da resposta
           console.log("Resposta completa da autorização:", auth);
@@ -438,14 +450,14 @@
         if (!userAddress) return;
 
         // URL da API para buscar NFTs
-const url = `https://xrp-asset-api.vercel.app/account/${userAddress}`;
+        const url = `https://xls20-api.xrpldata.com/account/${userAddress}/nfts`;
 
         try {
           const response = await fetch(url);
           const data = await response.json();
 
           // Altere o issuer abaixo para o da sua coleção!
-const filtered = data?.nfts?.filter(nft => nft.issuer === 'rPDGG5b2kWQPGSPZCULfUp26t39MrbLxzq') || [];
+          const filtered = data.nfts.filter(nft => nft.issuer === 'rPDGG5b2kWQPGSPZCULfUp26t39MrbLxzq');
 
           const grid = document.getElementById('user-nft-grid');
           grid.innerHTML = ''; // Limpa antes
@@ -458,12 +470,57 @@ const filtered = data?.nfts?.filter(nft => nft.issuer === 'rPDGG5b2kWQPGSPZCULfU
           filtered.forEach(nft => {
             const nftEl = document.createElement('div');
             nftEl.classList.add('nft');
-            nftEl.innerHTML = `<img src="${nft.url}" alt="XRPokémon" style="max-height: 100px;"><br><strong>${nft.name || 'XRPokémon'}</strong>`;
+            
+            // Cria um elemento de imagem para maior controle
+            const img = document.createElement('img');
+            img.alt = "XRPokémon";
+            img.style.maxHeight = "100px";
+            
+            // Tratamento de erro para imagens
+            img.onerror = function() {
+              this.onerror = null;
+              this.src = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png'; // Imagem fallback (Pikachu)
+              console.log(`Não foi possível carregar a imagem do NFT: ${nft.name}`);
+            };
+            
+            // Define o src depois de configurar o onerror
+            img.src = nft.url;
+            
+            // Cria um strong para o nome
+            const nameEl = document.createElement('strong');
+            nameEl.textContent = nft.name || 'XRPokémon';
+            
+            // Limpa e adiciona os elementos
+            nftEl.innerHTML = '';
+            nftEl.appendChild(img);
+            nftEl.appendChild(document.createElement('br'));
+            nftEl.appendChild(nameEl);
+            
+            // Adiciona o NFT ao grid
             grid.appendChild(nftEl);
+            
+            // Adiciona evento de clique para selecionar o NFT para batalha
+            nftEl.addEventListener('click', () => {
+              // Se o usuário clicar em um NFT na tela de NFTs, vamos copiá-lo para o grid de batalha
+              if (!selection1) {
+                const clone = nftEl.cloneNode(true);
+                nftGrid1.innerHTML = '';
+                nftGrid1.appendChild(clone);
+                selection1 = nftGrid1.children[0];
+                selection1.classList.add('selected');
+                if (selection2) battleButton.classList.remove('disabled');
+              }
+            });
           });
         } catch (err) {
           console.error("Erro ao buscar NFTs:", err);
-          document.getElementById('user-nft-grid').innerHTML = '<p>Erro ao carregar NFTs.</p>';
+          document.getElementById('user-nft-grid').innerHTML = '<p>Erro ao carregar NFTs. Problema com CORS detectado.</p>';
+          
+          // Adiciona uma mensagem explicativa para o console
+          console.log("Se você está enfrentando erros de CORS, tente uma destas opções:");
+          console.log("1. Configure o servidor da API para permitir requisições do seu domínio");
+          console.log("2. Crie um proxy no seu servidor para intermediar as chamadas à API");
+          console.log("3. Use um serviço como o CORS Anywhere (apenas para desenvolvimento)");
         }
       }
       
