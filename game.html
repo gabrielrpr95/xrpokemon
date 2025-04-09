@@ -438,14 +438,14 @@
         if (!userAddress) return;
 
         // URL da API para buscar NFTs
-        const url = `https://xls20-api.xrpldata.com/account/${userAddress}/nfts`;
+const url = `https://xrp-asset-api.vercel.app/account/${userAddress}`;
 
         try {
           const response = await fetch(url);
           const data = await response.json();
 
           // Altere o issuer abaixo para o da sua coleção!
-          const filtered = data.nfts.filter(nft => nft.issuer === 'rPDGG5b2kWQPGSPZCULfUp26t39MrbLxzq');
+const filtered = data?.nfts?.filter(nft => nft.issuer === 'rPDGG5b2kWQPGSPZCULfUp26t39MrbLxzq') || [];
 
           const grid = document.getElementById('user-nft-grid');
           grid.innerHTML = ''; // Limpa antes
