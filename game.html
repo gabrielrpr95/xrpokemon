@@ -238,7 +238,7 @@
   
   <!-- Seção Lobby (inicialmente visível) -->
   <div id="lobby" class="container section">
-    <h1>XRPokemon - Battle Arena (BETA)</h1>
+    <h1>XRPokemon - Battle Arena (BETA 1.0)</h1>
     <p>Open your room to wait for another XRPokemon Trainer.<br>
        The fixed cost to open or join the room is <strong>1.0 XRP</strong>.
     </p>
@@ -365,14 +365,12 @@
     console.log("Aguardando aprovação no app XUMM...");
     const auth = await xumm.authorize();
     
-    // Examina a estrutura completa da resposta (sem propriedades circulares)
-    console.log("Resposta da autorização (keys):", Object.keys(auth || {}));
-    console.log("Resposta success:", auth?.success);
-    console.log("Resposta me:", auth?.me);
+    // Examina a estrutura completa da resposta
+    console.log("Resposta completa da autorização:", auth);
     
-    // Verificação mais robusta
-    if (auth && auth.success === true && auth.me && typeof auth.me.account === 'string') {
-      userToken = auth.token;
+    // Nova verificação que não depende de auth.success
+    if (auth && auth.me && auth.me.account) {
+      userToken = auth.token || "";
       userAddress = auth.me.account;
       localStorage.setItem('xummUserToken', userToken);
       localStorage.setItem('xummWalletAddress', userAddress);
@@ -384,9 +382,8 @@
       const issues = [];
       if (!auth) issues.push("Resposta nula");
       else {
-        if (auth.success !== true) issues.push("Success não é true");
         if (!auth.me) issues.push("Objeto 'me' ausente");
-        else if (typeof auth.me.account !== 'string') issues.push("Conta não é string");
+        else if (!auth.me.account) issues.push("Conta não encontrada");
       }
       
       console.error("Falha na conexão. Problemas detectados:", issues);
